@@ -1,4 +1,8 @@
-# Conclusion
+# LeNet
+
+![lenet](../../img/classification/lenet.png)
+
+## Conclusion
 
 用 SGD 更新的会很慢
 
