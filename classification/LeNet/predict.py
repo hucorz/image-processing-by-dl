@@ -23,12 +23,16 @@ def get_config():
     return config
 
 def main(config):
+    labels = ['t-shirt', 'trouser', 'pullover', 'dress', 'coat',
+                   'sandal', 'shirt', 'sneaker', 'bag', 'ankle boot']
+
     device = "cuda" if torch.cuda.is_available() else "cpu"
     transform = transforms.Compose(
         [transforms.Resize([32, 32]),
         transforms.ToTensor()]
     )
     model = LeNet().to(device)
+    torch
     model.eval()
     
 

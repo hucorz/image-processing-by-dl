@@ -5,6 +5,8 @@ studying recording about image processing by deep learning
 
 大佬的库：https://github.com/WZMIAOMIAO/deep-learning-for-image-processing
 
+https://tangshusen.me/Dive-into-DL-PyTorch/#/
+
 ## windows 需要注意的地方
 
 代码中 num_workers 需要改为 0
