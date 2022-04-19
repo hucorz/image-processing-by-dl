@@ -12,11 +12,12 @@ from torchvision import transforms, datasets, utils
 
 import matplotlib.pyplot as plt
 
-from model import AlexNet
+from model import VGG
 
 def get_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--img_path", type=str, help="path of image to train, if None", default=None, required=True)
+    parser.add_argument("--vgg_version", type=str, help="vgg version, optional: vgg11, vgg13, vgg16, vgg19", default=None, required=True)
     parser.add_argument("--output_path", type=str, help="output file's saving path", default="./output", required=False)
     parser.add_argument("--lr", type=float, help="learning rate", default=0.0002, required=False)
     parser.add_argument("--epoch", type=int, help="epoch", default=20, required=False)
@@ -45,24 +46,22 @@ def main(config):
 
     nw = min([os.cpu_count(), 8, config.batch_size if config.batch_size > 1 else 0])
 
-    if config.img_path:
-        train_root = os.path.join(config.img_path, "train")
-        val_root = os.path.join(config.img_path, "val")
-        train_set = datasets.ImageFolder(root=train_root, transform=transform["train"])
-        train_loader = DataLoader(train_set, shuffle=True, batch_size=config.batch_size, num_workers=nw)
-        val_set = datasets.ImageFolder(root=val_root, transform=transform["val"])
-        val_loader = DataLoader(val_set, shuffle=False, batch_size=config.batch_size, num_workers=nw)
-        print(f"length of train set: {len(train_set)}")
-        print(f"length of val set: {len(val_set)}")
-    else:
-        assert config.img_path, "img_path is needed"
+    assert config.img_path, "img_path is needed"
+
+    train_root = os.path.join(config.img_path, "train")
+    val_root = os.path.join(config.img_path, "val")
+    train_set = datasets.ImageFolder(root=train_root, transform=transform["train"])
+    train_loader = DataLoader(train_set, shuffle=True, batch_size=config.batch_size, num_workers=nw)
+    val_set = datasets.ImageFolder(root=val_root, transform=transform["val"])
+    val_loader = DataLoader(val_set, shuffle=False, batch_size=config.batch_size, num_workers=nw)
+    print(f"length of train set: {len(train_set)}")
+    print(f"length of val set: {len(val_set)}")
 
     class2idx = train_set.class_to_idx
     print(class2idx)
     idx2class = dict((idx, cla) for cla, idx in class2idx.items())
 
-
-    model = AlexNet(len(class2idx.items())).to(device)
+    model = VGG(config.vgg_version, len(class2idx.items())).to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=config.lr)
@@ -115,7 +114,7 @@ def main(config):
             train_acc_record.append(running_acc / len(train_set))
 
             if (val_acc_record[-1] > best_val_acc):
-                torch.save(model.state_dict(), os.path.join(config.output_path, f"AlexNet_checkpoint.pth"))
+                torch.save(model.state_dict(), os.path.join(config.output_path, f"VGG_checkpoint.pth"))
                 best_val_acc = val_acc_record[-1]
             print(f"[epoch:{epoch+1:03d}/{config.epoch:03d}] train loss:{train_loss_record[-1]:.4f}, train acc:{train_acc_record[-1]:.4f} | val loss:{val_loss_record[-1]:.4f} val acc:{val_acc_record[-1]:.4f}")
 
@@ -150,20 +149,3 @@ if __name__ == "__main__":
         torch.cuda.manual_seed_all(myseed)
 
     main(config)
-
-    # train_loss_record = np.load("output/train_loss_record.npy")
-    # train_acc_record = np.load("output/train_acc_record.npy")
-    # val_loss_record = np.load("output/val_loss_record.npy")
-    # val_acc_record = np.load("output/val_acc_record.npy")
-    # plt.figure()
-    # plt.subplot(221);
-    # plt.plot(train_loss_record);plt.title("train loss record");
-    # plt.subplot(222);
-    # plt.plot(train_acc_record);plt.title("train acc record");
-    # plt.subplot(223);
-    # plt.plot(val_loss_record);plt.title("val loss record");
-    # plt.subplot(224);
-    # plt.plot(val_acc_record);plt.title("val acc record");
-    # plt.tight_layout()
-    # plt.savefig(os.path.join(config.output_path, "result.png"))
-    # plt.show()
