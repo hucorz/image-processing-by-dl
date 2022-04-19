@@ -18,7 +18,7 @@ from model import LeNet
 def get_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--img_path", type=str, help="path of image to train, if None, FashionMNIST will be download and used", default=None, required=False)
-    parser.add_argument("--save_path", type=str, help="output file's saving path", default="./output", required=False)
+    parser.add_argument("--output_path", type=str, help="output file's saving path", default="./output", required=False)
     parser.add_argument("--lr", type=float, help="learning rate", default=0.001, required=False)
     parser.add_argument("--epoch", type=int, help="epoch", default=30, required=False)
     config = parser.parse_args()
@@ -94,8 +94,8 @@ def main(config):
                     train_loss, train_acc = [], []
 
                     if (val_acc_record[-1] > best_val_acc):
-                        #  torch.save(model.state_dict(), os.path.join(config.save_path, f"LeNet_checkpoint_epoch{epoch}step_{step}.pth")) # 这输出的pth太多了
-                        torch.save(model.state_dict(), os.path.join(config.save_path, f"LeNet_checkpoint.pth"))
+                        #  torch.save(model.state_dict(), os.path.join(config.output_path, f"LeNet_checkpoint_epoch{epoch}step_{step}.pth")) # 这输出的pth太多了
+                        torch.save(model.state_dict(), os.path.join(config.output_path, f"LeNet_checkpoint.pth"))
                         best_val_acc = val_acc_record[-1]
                     print(f"[epoch:{epoch:03d}/{config.epoch:03d}, step:{step:04d}] train loss:{train_loss_record[-1]:.4f}, train acc:{train_acc_record[-1]:.4f} | val loss:{val_loss_record[-1]:.4f} val acc:{val_acc_record[-1]:.4f}")
                 model.train()
@@ -109,7 +109,7 @@ def main(config):
     plt.plot(val_loss_record);plt.title("val loss record");
     plt.subplot(224);
     plt.plot(val_acc_record);plt.title("val acc record");
-    plt.savefig(os.path.join(config.save_path, "result.png"))
+    plt.savefig(os.path.join(config.output_path, "result.png"))
 
 if __name__ == "__main__":
     config = get_config()

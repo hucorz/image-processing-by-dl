@@ -1,6 +1,6 @@
 # LeNet
 
-![lenet](../../img/classification/lenet.png)
+![lenet](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/lenet.png)
 
 ## Conclusion
 
