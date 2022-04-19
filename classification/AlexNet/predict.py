@@ -13,25 +13,26 @@ from torch.utils.data import DataLoader, Dataset
 import torchvision
 import torchvision.transforms as transforms
 
-from model import LeNet
+from model import AlexNet
 
 def get_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--img_path", help="path of image to predict", default=img_path, required=True)
-    parser.add_argument("--pth_path", help="pth file's path", default="./output/LeNet_checkpoint.pth")
+    parser.add_argument("--img_path", type=str, help="path of image to predict", required=True)
+    parser.add_argument("--pth_path", type=str, help="pth file's path", default="./output/AlexNet_checkpoint.pth", required=True)
+    parser.add_argument("--num_classes",type=int, default=1000, required=True)
     config = parser.parse_args()
     return config
 
 def main(config):
-    labels = ['t-shirt', 'trouser', 'pullover', 'dress', 'coat', 'sandal', 'shirt', 'sneaker', 'bag', 'ankle boot']
+    labels = ['daisy', 'dandelion', 'roses', 'sunflower', 'tulips']
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     transform = transforms.Compose([
-        transforms.Grayscale(num_output_channels=1),  # 转化为灰度图
-        transforms.Resize([32, 32]),
-        transforms.ToTensor()]
-    )
-    model = LeNet().to(device)
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize((0.5, 0.5, 0.5), (0.5, 0.5, 0.5))
+    ])
+    model = AlexNet(config.num_classes).to(device)
     model.load_state_dict(torch.load(config.pth_path))
     model.eval()
     
@@ -41,9 +42,12 @@ def main(config):
 
     with torch.no_grad():
         output = model(im.to(device))
+        output = torch.squeeze(output).cpu()
+        # print(output.shape)
+        output = torch.softmax(output, dim=0)
         pred = output.argmax(dim=-1)
         pred = pred.item()
-    print(f"result: {labels[pred]}")
+    print(f"result: {labels[pred]}, {output[pred]}")
 
 
 if __name__ == "__main__":
