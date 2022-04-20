@@ -17,7 +17,6 @@ from model import GoogLeNet
 def get_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--img_path", type=str, help="path of image to train, if None", default=None, required=True)
-    parser.add_argument("--vgg_version", type=str, help="vgg version, optional: vgg11, vgg13, vgg16, vgg19", default=None, required=True)
     parser.add_argument("--output_path", type=str, help="output file's saving path", default="./output", required=False)
     parser.add_argument("--lr", type=float, help="learning rate", default=0.0002, required=False)
     parser.add_argument("--epoch", type=int, help="epoch", default=20, required=False)
@@ -61,7 +60,7 @@ def main(config):
     print(class2idx)
     idx2class = dict((idx, cla) for cla, idx in class2idx.items())
 
-    model = VGG(config.vgg_version, len(class2idx.items())).to(device)
+    model = GoogLeNet(len(class2idx.items()), aux_logits=True).to(device)
 
     criterion = nn.CrossEntropyLoss()
     optimizer = optim.Adam(model.parameters(), lr=config.lr)
@@ -82,8 +81,11 @@ def main(config):
             inputs, labels = inputs.to(device), labels.to(device)
 
             optimizer.zero_grad()
-            outputs = model(inputs)
-            loss = criterion(outputs, labels)
+            outputs, aux1, aux2 = model(inputs)
+            loss0 = criterion(outputs, labels)
+            loss1 = criterion(aux1, labels)
+            loss2 = criterion(aux2, labels)
+            loss = loss0 + loss1 *0.3 + loss2 * 0.3
             loss.backward()
             optimizer.step()
 
