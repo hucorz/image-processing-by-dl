@@ -33,5 +33,5 @@ train_set = torchvision.datasets.FashionMNIST(root='~/Datasets/FashionMNIST', tr
 
 前提：会翻墙
 
-[大致参考流程]((https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/others/google colab example.ipynb))
+[大致参考流程]((https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/others/google_colab_example.ipynb))
 
