@@ -116,7 +116,7 @@ def main(config):
             train_acc_record.append(running_acc / len(train_set))
 
             if (val_acc_record[-1] > best_val_acc):
-                torch.save(model.state_dict(), os.path.join(config.output_path, f"VGG_checkpoint.pth"))
+                torch.save(model.state_dict(), os.path.join(config.output_path, f"GoogLeNet_checkpoint.pth"))
                 best_val_acc = val_acc_record[-1]
             print(f"[epoch:{epoch+1:03d}/{config.epoch:03d}] train loss:{train_loss_record[-1]:.4f}, train acc:{train_acc_record[-1]:.4f} | val loss:{val_loss_record[-1]:.4f} val acc:{val_acc_record[-1]:.4f}")
 
@@ -133,6 +133,7 @@ def main(config):
     plt.plot(val_loss_record);plt.title("val loss record");
     plt.subplot(224);
     plt.plot(val_acc_record);plt.title("val acc record");
+    plt.tight_layout()
     plt.savefig(os.path.join(config.output_path, "result.png"))
 
 if __name__ == "__main__":
