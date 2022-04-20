@@ -9,3 +9,5 @@
 ## Conclusion
 
 验证集的 acc 一直都比训练集的高
+
+![](./output/result.png)

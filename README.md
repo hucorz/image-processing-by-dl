@@ -26,3 +26,12 @@ train_set = torchvision.datasets.FashionMNIST(root='~/Datasets/FashionMNIST', tr
 # 改为
 train_set = torchvision.datasets.FashionMNIST(root='~/Datasets/FashionMNIST', train=True, download=True, transform=transform, num_workers=0)
 ```
+
+## Google Colab 的使用
+
+如果缺乏 GPU 资源，且不需要跑特别复杂的网络（比如我），可以使用 Google Colab
+
+前提：会翻墙
+
+[大致参考流程]((https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/others/google colab example.ipynb))
+
