@@ -18,7 +18,7 @@ from model import GoogLeNet
 def get_config():
     parser = argparse.ArgumentParser()
     parser.add_argument("--img_path", type=str, help="path of image to predict", required=True)
-    parser.add_argument("--pth_path", type=str, help="pth file's path", default="./output/VGG_checkpoint.pth", required=True)
+    parser.add_argument("--pth_path", type=str, help="pth file's path", default="./output/GoogleNet_checkpoint.pth", required=True)
     parser.add_argument("--num_classes",type=int, default=1000, required=True)
     config = parser.parse_args()
     return config
