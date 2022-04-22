@@ -34,7 +34,7 @@ class BasicBlock(nn.Module):
         x = self.relu(x)
 
         x = self.conv2(x)
-        x = self.bn1(x)
+        x = self.bn2(x)
 
         x += identity
         x = self.relu(x)
@@ -56,9 +56,11 @@ class Bottleneck(nn.Module):
     expansion = 4
     def __init__(self, in_channel, out_channel, stride=1, downsample=None, groups=1, width_per_group=64):
         '''
-        stride 是 3x3 conv 的 stride
+        args:
+        - out_channel: 不是最终的 out_channel, 是中间的 3x3 conv 的输出 channel,  最终的输出 channel 为 out_channel*expansion
+        - stride 是 3x3 conv 的 stride
         '''
-        width = int(out_channel * (width_per_group / 64.)) * groups
+        width = int(out_channel * (width_per_group / 64.)) * groups # ，
 
         self.conv1 = nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=1, bias=False)
         self. bn1 = nn.BatchNorm2d(out_channel)

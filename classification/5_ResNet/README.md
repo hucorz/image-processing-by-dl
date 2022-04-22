@@ -2,7 +2,10 @@
 
 ## Conclusion
 
-代码中使用的 resnet34，如果使用预训练的 ResNet34 来做 linear evaluation，train set 上可以训练的很好，但测试集上非常差，过拟合？但是 [WZMIAOMIAO的视频](https://www.bilibili.com/video/BV14E411H7Uw/?spm_id_from=333.788)中一个 epoch 的效果就很好，很奇怪
+新增的命令行参数：
+ 
+ - --linear_eval：使用线性评估，需要导入预训练 pth 文件
+ - --pretrained_path <path>：pth 预训练文件路径
 
 ---
 
@@ -21,6 +24,10 @@ ResNet50 / 101 / 152  中：
 
 ## Model
 
+ResNet：
+
 ![ResNet](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNet.png)
 
-![ResNet](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNet34.png)
+ResNet34：
+
+![ResNet34](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNet34.png)

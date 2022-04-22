@@ -24,7 +24,7 @@ def get_config():
     parser.add_argument("--output_path", type=str, help="output file's saving path", default="./output", required=False)
     parser.add_argument("--lr", type=float, help="learning rate", default=0.0001, required=False)
     parser.add_argument("--epoch", type=int, help="epoch", default=5, required=False)
-    parser.add_argument("--batch_size", type=int, help="batch size", default=32, required=False)
+    parser.add_argument("--batch_size", type=int, help="batch size", default=16, required=False)
     parser.add_argument("--linear_eval", help="do linear evaluation with a pretrained model", action="store_true", required=False)
     parser.add_argument("--pretrained_path", help="pretrained model's pth file path", type=str, required=False)
 
@@ -40,13 +40,13 @@ def main(config):
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     transform = {
         "train":transforms.Compose([
-            transforms.RandomSizedCrop(224),
+           transforms.RandomResizedCrop(224),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
         ]),
         "val": transforms.Compose([
-            transforms.Scale(256),
+            transforms.Resize(256),
             transforms.CenterCrop(224),
             transforms.ToTensor(),
             normalize,
@@ -71,7 +71,7 @@ def main(config):
     idx2class = dict((idx, cla) for cla, idx in class2idx.items())
 
     if config.linear_eval:
-        model = resnet34().to(device)
+        model = resnet34()
         assert config.pretrained_path, "do linear evaluation need pretrained pth file"
         state_dict = torch.load(config.pretrained_path)
         # for key in list(state_dict.keys()):                                   # 删除预训练文件中的 fc 层
