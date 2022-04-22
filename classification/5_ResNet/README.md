@@ -2,10 +2,20 @@
 
 ## Conclusion
 
+模型没有给指定 ResNet 版本的参数，代码使用的是 ResNet34
+
 新增的命令行参数：
  
  - --linear_eval：使用线性评估，需要导入预训练 pth 文件
  - --pretrained_path <path>：pth 预训练文件路径
+
+使用 pretrained 的模型效果会很好，如果导入除 fc 层外（fc层输出维度不同）的参数再训练，第一个 epoch validation acc 基本就可以接近 90
+
+使用预训练的 pth 文件，lr=0.0001，batch_size=32，训练 5 个 epoch 的结果：
+
+最后一个 epoch 的结果：train loss:18.3951, train acc:0.9380 | val loss:2.0924 val acc:0.9451
+
+![result](./output/result.png)
 
 ---
 

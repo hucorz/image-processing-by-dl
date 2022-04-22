@@ -24,7 +24,7 @@ def get_config():
     parser.add_argument("--output_path", type=str, help="output file's saving path", default="./output", required=False)
     parser.add_argument("--lr", type=float, help="learning rate", default=0.0001, required=False)
     parser.add_argument("--epoch", type=int, help="epoch", default=5, required=False)
-    parser.add_argument("--batch_size", type=int, help="batch size", default=16, required=False)
+    parser.add_argument("--batch_size", type=int, help="batch size", default=32, required=False)
     parser.add_argument("--linear_eval", help="do linear evaluation with a pretrained model", action="store_true", required=False)
     parser.add_argument("--pretrained_path", help="pretrained model's pth file path", type=str, required=False)
 
