@@ -41,3 +41,11 @@ ResNet：
 ResNet34：
 
 ![ResNet34](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNet34.png)
+
+ResNeXt Block：
+
+![ResNeXt Block](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNeXt_Block.png)
+
+ResNeXt-50（32 x 4d）：
+
+![ResNeXt Block](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNeXt50.png)
