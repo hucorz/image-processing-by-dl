@@ -109,6 +109,7 @@ def main(config):
     plt.plot(val_loss_record);plt.title("val loss record");
     plt.subplot(224);
     plt.plot(val_acc_record);plt.title("val acc record");
+    plt.tight_layout()
     plt.savefig(os.path.join(config.output_path, "result.png"))
 
 if __name__ == "__main__":
