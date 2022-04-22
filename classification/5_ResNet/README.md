@@ -42,7 +42,7 @@ ResNet34：
 
 ![ResNet34](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNet34.png)
 
-ResNeXt Block：
+ResNeXt Block：下面的三个 block 是等价的
 
 ![ResNeXt Block](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNeXt_Block.png)
 

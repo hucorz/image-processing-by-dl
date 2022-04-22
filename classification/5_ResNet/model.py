@@ -51,6 +51,9 @@ class Bottleneck(nn.Module):
 
     args:
         - out_channel: 不代表最终的 out_channel, 而是中间的 channel, 最终的 out_channel 为 out_channel * expansion
+        - group: 和 ResNeXt 有关
+        - width_per_group: 和 ResNeXt 有关
+    
     """
 
     expansion = 4
@@ -60,7 +63,8 @@ class Bottleneck(nn.Module):
         - out_channel: 不是最终的 out_channel, 是中间的 3x3 conv 的输出 channel,  最终的输出 channel 为 out_channel*expansion
         - stride 是 3x3 conv 的 stride
         '''
-        width = int(out_channel * (width_per_group / 64.)) * groups # ，
+        # 普通 ResNet 情况下 groups 和 width_per_group 为默认参数，width = out_channel
+        width = int(out_channel * (width_per_group / 64.)) * groups 
 
         self.conv1 = nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=1, bias=False)
         self. bn1 = nn.BatchNorm2d(out_channel)
