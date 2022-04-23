@@ -18,7 +18,7 @@ Inverted Residual Block：升维再降维
 
 ![Inverted Residual Block](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/MobileNet(v2)_1.png)
 
-输入 $k$ 维 输出 $k'$ 维的 Bottleneck residual block
+输入 k 维 输出 k' 维的 Bottleneck residual block
 
 ![](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/MobileNet(v2)_2.png)
 
