@@ -34,6 +34,8 @@ ResNet50 / 101 / 152  中：
 
 ## Model
 
+### ResNet
+
 ResNet：
 
 ![ResNet](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNet.png)
@@ -41,6 +43,8 @@ ResNet：
 ResNet34：
 
 ![ResNet34](https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ResNet34.png)
+
+### ResNeXt
 
 ResNeXt Block：下面的三个 block 是等价的
 
