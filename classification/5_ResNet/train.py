@@ -14,7 +14,7 @@ import torchvision.models.resnet
 
 import matplotlib.pyplot as plt
 
-from model import resnet34
+from model import resnet34, resnext50_32x4d
 
 
 

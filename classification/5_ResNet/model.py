@@ -63,16 +63,18 @@ class Bottleneck(nn.Module):
         - out_channel: 不是最终的 out_channel, 是中间的 3x3 conv 的输出 channel,  最终的输出 channel 为 out_channel*expansion
         - stride 是 3x3 conv 的 stride
         '''
+        super().__init__()
         # 普通 ResNet 情况下 groups 和 width_per_group 为默认参数，width = out_channel
+        # ResNeXt-50(32x4d) 时，groups = 32, width_per_group=4，width=out_channel*2
         width = int(out_channel * (width_per_group / 64.)) * groups 
 
-        self.conv1 = nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=1, bias=False)
-        self. bn1 = nn.BatchNorm2d(out_channel)
+        self.conv1 = nn.Conv2d(in_channel, width, kernel_size=1, stride=1, bias=False)
+        self. bn1 = nn.BatchNorm2d(width)
 
-        self.conv2 = nn.Conv2d(out_channel, out_channel, kernel_size=3, padding=1, stride=stride, bias=False)
-        self.bn2 = nn.BatchNorm2d(out_channel)
+        self.conv2 = nn.Conv2d(width, width, kernel_size=3, padding=1, stride=stride, groups=groups, bias=False)
+        self.bn2 = nn.BatchNorm2d(width)
 
-        self.conv3 = nn.Conv2d(out_channel, out_channel*self.expansion, kernel_size=1, stride=1, bias=False)
+        self.conv3 = nn.Conv2d(width, out_channel*self.expansion, kernel_size=1, stride=1, bias=False)
         self.bn3 = nn.BatchNorm2d(out_channel*self.expansion)
 
         self.relu = nn.ReLU()
@@ -101,18 +103,20 @@ class Bottleneck(nn.Module):
 
 
 class ResNet(nn.Module):
-    def __init__(self, block, blocks_num, num_classes=1000, include_top=True):
+    def __init__(self, block, blocks_num, num_classes=1000, include_top=True, groups=1, width_per_group=64):
         '''
         args:
             block: res18 和 res34 使用 BasicBlock, res50,101,152 使用 Bottleneck
             blocks_num: list, 表示 conv2.x conv3.x 4.x 5.x 的个数
         '''
-        super(ResNet, self).__init__()
+        super().__init__()
         self.include_top = include_top
         self.in_channel = 64                    # conv2.x 开始的 in_channel
 
-        self.conv1 = nn.Conv2d(
-            3, self.in_channel, kernel_size=7, stride=2, padding=3, bias=False)
+        self.groups = groups
+        self.width_per_group = width_per_group
+
+        self.conv1 = nn.Conv2d(3, self.in_channel, kernel_size=7, stride=2, padding=3, bias=False)
         self.bn1 = nn.BatchNorm2d(self.in_channel)
         self.relu = nn.ReLU(inplace=True)
 
@@ -152,13 +156,13 @@ class ResNet(nn.Module):
             )
 
         layers = []
-        layers.append(block(self.in_channel, channel, downsample=downsample, stride=stride))
+        layers.append(block(self.in_channel, channel, downsample=downsample, stride=stride, groups=self.groups, width_per_group=self.width_per_group))
         self.in_channel = channel * block.expansion
 
         for _ in range(1, block_num):
             # conv n.x 中 只有第一个 block 会指定 stride,  后面的 block 不会改变 HxW
             # 且后面的 block 的 in_channel 和 out_channel 一定相同，这里的 block 的参数 channel 并不是最终的 out_channel，block 中的 out_channel = channel * block.expansion
-            layers.append(block(self.in_channel, channel)) 
+            layers.append(block(self.in_channel, channel, groups=self.groups, width_per_group=self.width_per_group)) 
 
         return nn.Sequential(*layers)
 
@@ -184,16 +188,13 @@ def resnet34(num_classes=1000, include_top=True):
     # https://download.pytorch.org/models/resnet34-333f7ec4.pth
     return ResNet(BasicBlock, [3, 4, 6, 3], num_classes=num_classes, include_top=include_top)
 
-
 def resnet50(num_classes=1000, include_top=True):
     # https://download.pytorch.org/models/resnet50-19c8e357.pth
     return ResNet(Bottleneck, [3, 4, 6, 3], num_classes=num_classes, include_top=include_top)
 
-
 def resnet101(num_classes=1000, include_top=True):
     # https://download.pytorch.org/models/resnet101-5d3b4d8f.pth
     return ResNet(Bottleneck, [3, 4, 23, 3], num_classes=num_classes, include_top=include_top)
-
 
 def resnext50_32x4d(num_classes=1000, include_top=True):
     # https://download.pytorch.org/models/resnext50_32x4d-7cdf4587.pth
@@ -204,7 +205,6 @@ def resnext50_32x4d(num_classes=1000, include_top=True):
                   include_top=include_top,
                   groups=groups,
                   width_per_group=width_per_group)
-
 
 def resnext101_32x8d(num_classes=1000, include_top=True):
     # https://download.pytorch.org/models/resnext101_32x8d-8ba56ff5.pth
