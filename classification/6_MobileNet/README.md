@@ -18,7 +18,7 @@
 
 倒残差 Block，Block 的输入和输出的维度完全相同才做 shortcut 操作，即 shortcut 不做任何的变换
 
-Residual Block: 降为再升维
+Residual Block: 降维再升维
 
 Inverted Residual Block：升维再降维
 

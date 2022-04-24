@@ -200,7 +200,7 @@ def mobilenet_v3_large(num_classes: int = 1000, reduced_tail: bool = False) -> M
     bneck_conf = partial(InvertedResidualConfig, width_multi=width_multi)
     adjust_channels = partial(InvertedResidualConfig.adjust_channels, width_multi=width_multi)
 
-    reduce_divider = 2 if reduced_tail else 1
+    reduce_divider = 2 if reduced_tail else 1  # reduced_tail 为 True 可以进一步减少参数
 
     inverted_residual_setting = [
         # input_c, kernel, expanded_c, out_c, use_se, activation, stride
