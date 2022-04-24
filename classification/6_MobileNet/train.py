@@ -10,16 +10,20 @@ import torch.optim as optim
 from torch.utils.data import DataLoader, Dataset
 
 from torchvision import transforms, datasets, utils
-import torchvision.models.resnet
+import torchvision.models.mobilenetv2
+import torchvision.models.mobilenetv3
+
 
 import matplotlib.pyplot as plt
 
-from model import resnet34, resnext50_32x4d
+from model_v2 import MobileNetV2
+from model_v3 import mobilenet_v3_large, mobilenet_v3_small
 
 
 
 def get_config():
     parser = argparse.ArgumentParser()
+    parser.add_argument("--model_version", help="v2 or v3-small or v3-large", type=str, required=True, choices=["v2", "v3-small", "v3-large"])
     parser.add_argument("--img_path", type=str, help="path of image to train, if None", default=None, required=True)
     parser.add_argument("--output_path", type=str, help="output file's saving path", default="./output", required=False)
     parser.add_argument("--lr", type=float, help="learning rate", default=0.0001, required=False)
@@ -27,7 +31,6 @@ def get_config():
     parser.add_argument("--batch_size", type=int, help="batch size", default=32, required=False)
     parser.add_argument("--linear_eval", help="do linear evaluation with a pretrained model", action="store_true", required=False)
     parser.add_argument("--pretrained_path", help="pretrained model's pth file path", type=str, required=False)
-
 
     config = parser.parse_args()
     return config
@@ -55,8 +58,6 @@ def main(config):
 
     nw = min([os.cpu_count(), 8, config.batch_size if config.batch_size > 1 else 0])
 
-    assert config.img_path, "img_path is needed"
-
     train_root = os.path.join(config.img_path, "train")
     val_root = os.path.join(config.img_path, "val")
     train_set = datasets.ImageFolder(root=train_root, transform=transform["train"])
@@ -70,23 +71,29 @@ def main(config):
     print(class2idx)
     idx2class = dict((idx, cla) for cla, idx in class2idx.items())
 
+    num_class = len(class2idx)
+    if config.model_version == "v2":
+        model = MobileNetV2(num_class)
+    elif config.model_version == "v3-small":
+        model = mobilenet_v3_small(num_class)
+    elif config.model_version == "v3-large":
+        model = mobilenet_v3_large(num_class)
+    else:
+        raise ValueError("model version error")
+
     if config.linear_eval:
-        model = resnet34()
         assert config.pretrained_path, "do linear evaluation need pretrained pth file"
         state_dict = torch.load(config.pretrained_path)
-        # for key in list(state_dict.keys()):                                   # 删除预训练文件中的 fc 层
-        #     if "fc" in key:
-        #         state_dict.pop(key)
-        model_dict = model.state_dict()
+
+        for key in list(state_dict.keys()):                                   # 删除预训练文件中的 fc 层
+            if "fc" in key:
+                state_dict.pop(key)
+
         model.load_state_dict(state_dict)
         # for name, para in model.named_parameters():  # 冻结非 fc 层的参数
         #     if "fc" not in name:
         #         para.requires_grad = False      
-        in_channel = model.fc.in_features
-        model.fc = nn.Linear(in_channel, len(class2idx))
-        model.to(device)     
-    else:
-        model = resnet34(num_classes=len(class2idx)).to(device)      
+        model.to(device)        
               
     # pdb.set_trace()
 
@@ -141,7 +148,7 @@ def main(config):
             train_acc_record.append(running_acc / len(train_set))
 
             if (val_acc_record[-1] > best_val_acc):
-                torch.save(model.state_dict(), os.path.join(config.output_path, f"ResNet34_checkpoint.pth"))
+                torch.save(model.state_dict(), os.path.join(config.output_path, f"mobilenet_checkpoint.pth"))
                 best_val_acc = val_acc_record[-1]
             print(f"[epoch:{epoch+1:03d}/{config.epoch:03d}] train loss:{train_loss_record[-1]:.4f}, train acc:{train_acc_record[-1]:.4f} | val loss:{val_loss_record[-1]:.4f} val acc:{val_acc_record[-1]:.4f}")
 
