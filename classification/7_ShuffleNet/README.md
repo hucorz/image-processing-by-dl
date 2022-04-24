@@ -1,5 +1,11 @@
 # ShuffleNet
 
+## Conclusion
+
+使用预训练的 v2 1x 的 pth 文件，lr=0.0001，batch_size=32，训练 5 个 epoch 的结果：
+
+![output](./output/result.png)
+
 ## Model
 
 ### ShuffleNet(v1)

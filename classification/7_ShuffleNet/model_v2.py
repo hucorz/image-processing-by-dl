@@ -76,18 +76,18 @@ class InvertedResidual(nn.Module):
 class ShuffleNetV2(nn.Module):
     def __init__(self, 
         stages_repeats: List[int],
-        stages_out_channel: List[int],
+        stages_out_channels: List[int],
         num_classes: int=1000,
         inverted_residual=InvertedResidual):
         super().__init__()
 
         assert len(stages_repeats) == 3
-        assert len(stages_out_channel) == 5
+        assert len(stages_out_channels) == 5
 
-        self._stage_out_channels = stages_out_channel
+        # self._stage_out_channels = stages_out_channels
 
         in_channel = 3
-        out_channel = self._stage_out_channels[0]
+        out_channel = stages_out_channels[0]
 
         self.conv1 = nn.Sequential( # out_size: [112, 112]
             nn.Conv2d(in_channel, out_channel, kernel_size=3, stride=2, padding=1, bias=False),
@@ -103,14 +103,14 @@ class ShuffleNetV2(nn.Module):
         self.stage4: nn.Sequential
 
         stage_names = [f"stage{i}" for i in [2, 3, 4]]
-        for name, repeats, out_channel in zip(stage_names, stages_repeats, stages_out_channel[1:]): # 列表长度不同时, zip默认用最短的
+        for name, repeats, out_channel in zip(stage_names, stages_repeats, stages_out_channels[1:]): # 列表长度不同时, zip默认用最短的
             layers = [inverted_residual(in_channel, out_channel, 2)] # 第一个 block 要下采样，stride=2
             for _ in range(repeats-1):
                 layers.append(inverted_residual(out_channel, out_channel, 1))
             setattr(self, name, nn.Sequential(*layers))  # 属性赋值
             in_channel = out_channel
         
-        out_channel = self._stage_out_channel[-1] # 最后一个 out_channel 上面 zip 里并没有用到
+        out_channel = stages_out_channels[-1] # 最后一个 out_channel 上面 zip 里并没有用到
         self.conv5 = nn.Sequential(
             nn.Conv2d(in_channel, out_channel, kernel_size=1, stride=1, padding=0, bias=False),
             nn.BatchNorm2d(out_channel),
