@@ -20,7 +20,9 @@ def _make_divisible(ch, divisor=8, min_ch=None):
 class ConvBNReLU(nn.Sequential):
     '''
     注意这里继承的 nn.Sequential
-    Conv +BN +ReLU, 且输出不改变 HxW
+    Conv +BN +ReLU
+    stride = 1 不改变 HxW
+    stride = 2 H/2 x W/2
     '''
     def __init__(self, in_channel, out_channel, kernel_size=3, stride=1, groups=1):
         padding = (kernel_size-1) // 2 # kernel_size=1 => padding=0, kernel_size=3 => padding=1
@@ -45,7 +47,7 @@ class InvertedResidual(nn.Module):
         if expand_ratio != 1:   # 如果中间层channel不扩展，开始1x1卷积没有意义
             layers.append(ConvBNReLU(in_channel, hidden_channel, kernel_size=1))  # 1x1 pw conv
         layers.extend([
-            ConvBNReLU(hidden_channel, hidden_channel, kernel_size=3, groups=hidden_channel), # 3x3 dw conv
+            ConvBNReLU(hidden_channel, hidden_channel, stride=stride, groups=hidden_channel), # 3x3 dw conv
             nn.Conv2d(hidden_channel, out_channel, kernel_size=1, bias=False), #1x1 pw conv，因为最后的 conv 使用线性激活函数，所以不用 ConvBNReLU
             nn.BatchNorm2d(out_channel),
         ])
@@ -83,7 +85,7 @@ class MobileNetV2(nn.Module):
         for t, c, n, s in inverted_residual_setting:
             output_channel = _make_divisible(c*alpha, round_nearest)
             for i in range(n):
-                stride = s if  i == 0 else 1
+                stride = s if  i == 0 else 1 # 第一个block后面的block不
                 layers.append(block(input_channel, output_channel, stride=stride, expand_ratio=t))
                 input_channel = output_channel
         

@@ -86,13 +86,15 @@ def main(config):
         state_dict = torch.load(config.pretrained_path)
 
         for key in list(state_dict.keys()):                                   # 删除预训练文件中的 fc 层
-            if "fc" in key:
+            if "classifier" in key:
                 state_dict.pop(key)
 
-        model.load_state_dict(state_dict)
-        # for name, para in model.named_parameters():  # 冻结非 fc 层的参数
-        #     if "fc" not in name:
-        #         para.requires_grad = False      
+        model.load_state_dict(state_dict, strict=False)
+
+        for name, para in model.named_parameters():  # 冻结非 fc 层的参数
+            if "classifier" not in name:
+                para.requires_grad = False      
+
         model.to(device)        
               
     # pdb.set_trace()

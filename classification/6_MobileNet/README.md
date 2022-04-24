@@ -2,9 +2,13 @@
 
 ## Conclusion
 
-v3:
+使用预训练的 v2 pth 文件，lr=0.0001，batch_size=32，训练 5 个 epoch 的结果：
 
-第一个 bneck 不需要第一个 1x1 conv 来升维
+![](output/result_v2.png)
+
+使用预训练的 v3-large pth 文件，lr=0.0001，batch_size=32，训练 5 个 epoch 的结果：
+
+![](output/result_v3.png)
 
 ## Model
 

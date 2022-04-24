@@ -35,7 +35,7 @@ class ConvBNActivation(nn.Sequential):
         if activation_layer is None:
             activation_layer = nn.ReLU6
 
-        super(self).__init__(
+        super().__init__(
             nn.Conv2d(in_channel, out_channel, kernel_size, stride=stride, padding=padding, groups=groups, bias=False),
             norm_layer(out_channel),
             activation_layer()
@@ -52,17 +52,17 @@ class SqueezeExcitation(nn.Module):
 
     def forward(self, x):
         scale = F.adaptive_avg_pool2d(x, output_size=(1, 1))
-        scale = self.fc1(x) # 用的是 conv，所以不需要 flatten
-        scale = F.relu(x)
-        scale = self.fc2(x)
-        scale = F.hardsigmoid(x)
+        scale = self.fc1(scale) # 用的是 conv，所以不需要 flatten
+        scale = F.relu(scale)
+        scale = self.fc2(scale)
+        scale = F.hardsigmoid(scale)
         return x*scale
 
 
 class InvertedResidualConfig:
     def __init__(self, in_channel, kernel_size, expanded_c, out_channel, use_se: bool, activation: str, stride, width_multi: float):
         '''
-        width_multi: 
+        width_multi: 控制模型宽度(channel)
         '''
         self.in_channel = _make_divisible(in_channel*width_multi, 8)
         self.kernel_size = kernel_size
@@ -72,22 +72,22 @@ class InvertedResidualConfig:
         self.use_hs = (activation == "HS")
         self.stride = stride
 
-        @staticmethod   # 此静态方法后面会用到
-        def adjust_channels(channels: int, width_multi: float):
-            return _make_divisible(channels * width_multi, 8)
+    @staticmethod   # 此静态方法后面会用到
+    def adjust_channels(channels: int, width_multi: float):
+        return _make_divisible(channels * width_multi, 8)
 
 class InvertedResidual(nn.Module):
     '''
     bneck 模块
     '''
-    def __inti__(self, cnf: InvertedResidualConfig, norm_layer):
+    def __init__(self, cnf: InvertedResidualConfig, norm_layer):
         super().__init__()
-        assert cnf.stride not in [1, 2], "stride must be 1 or 2"
+        assert cnf.stride in [1, 2], "stride must be 1 or 2"
 
         self.use_res_connect = (cnf.stride == 1 and cnf.in_channel == cnf.out_channel)  # 只有输入输出完全一样才使用 shortcut
 
         layers = []
-        activation_layer = nn.Hardsigmoid if cnf.use_hs else nn.ReLU
+        activation_layer = nn.Hardswish if cnf.use_hs else nn.ReLU
 
         if cnf.expanded_c != cnf.in_channel:  # 如果中间 channel 不需要扩张就不需要加 1x1 conv
             layers.append(ConvBNActivation(cnf.in_channel, cnf.expanded_c, kernel_size=1, norm_layer=norm_layer, activation_layer=activation_layer))
@@ -128,10 +128,10 @@ class MobileNetV3(nn.Module):
     '''
     MobileNet(v3)
     '''
-    def __init__(self, inverted_residual_setting, last_channel, num_classes, block, norm_layer):
+    def __init__(self, inverted_residual_setting, last_channel, num_classes, block=None, norm_layer=None):
         '''
         args:
-            - last_channel: self.features(特征层/编码层)的输出, self.classifier 的输入
+            - last_channel: 最后一个 fc 层的 in_channel
         '''
         super().__init__()
         assert inverted_residual_setting, "inverted_residual_setting should not be empty"
@@ -146,7 +146,7 @@ class MobileNetV3(nn.Module):
         layers = []
 
         # building first layer
-        firstconv_out_cahnnel = inverted_residual_setting[0].input_channel # setting 不包括开头的 conv
+        firstconv_out_cahnnel = inverted_residual_setting[0].in_channel # setting 不包括开头的 conv
         layers.append(ConvBNActivation(
             in_channel=3,
             out_channel=firstconv_out_cahnnel,
