@@ -10,7 +10,7 @@ ChannelShuffle:
 
 <img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ShuffleNet(v1)_1.png" alt="ChannelShuffle" style="zoom: 80%;" />
 
-ShuffleNet Unit: 
+ShuffleNet(v1) Unit: 
 
 ShuffleNet Unit 全是 GConv 和 DWConv
 
@@ -18,7 +18,7 @@ ResNeXt 作者指出 pw conv 占据的计算量非常多，所以 group conv 的
 
 <img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ShuffleNet(v1)_2.png" alt="ShuffleNet Unit" style="zoom:80%;" />
 
-ShuffleNet architecture: 
+ShuffleNet(v1) architecture: 
 
 注意 stage2 不使用 GConv 在第一个 1x1 conv，因为维度太小了
 
@@ -41,6 +41,8 @@ Basic Unit in ShuffleNet(v2):
 -   Also, the three successive elementwise operations, “Concat”, “Channel Shuffle” and “Channel Split”, are merged into a single element-wise operation. These changes are beneficial according to G4.（不是很理解）
 
 <img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ShuffleNet(v2)_1.png" alt="ShuffleNet architecture" style="zoom:80%;" />
+
+ShuffleNet(v2) architecture: 
 
 <img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/ShuffleNet(v2)_2.png" alt="ShuffleNet architecture" style="zoom:80%;" />
 
