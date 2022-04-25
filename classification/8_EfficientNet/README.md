@@ -1,5 +1,13 @@
 # EfficientNet
 
+## Conclusion
+
+pth 文件 pytorch 官方并没有给，[大佬](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing)有给从 tensorflow 那边转过来的，[这里](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/blob/master/pytorch_classification/Test9_efficientNet/train.py)
+
+使用预训练的 B0 的 pth 文件，lr=0.0001，batch_size=32，训练 15 个 epoch 的结果(我这里训练 15 个epoch 都不及之前训练 5 个，不知道是不是我的 model 有错误)：
+
+![](./output/result.png)
+
 ## Model
 
 EfficientNet 十分占显存  

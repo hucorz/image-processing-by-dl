@@ -16,14 +16,12 @@ import torchvision.models.mobilenetv3
 
 import matplotlib.pyplot as plt
 
-from model import MobileNetV2
-from model import mobilenet_v3_large, mobilenet_v3_small
-
-
+from model import efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4
+from model import efficientnet_b5, efficientnet_b6, efficientnet_b7
 
 def get_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_version", help="v2 or v3-small or v3-large", type=str, required=True, choices=["v2", "v3-small", "v3-large"])
+    parser.add_argument("--model_version", help="B0 - B7", type=str, required=True, choices=["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"])
     parser.add_argument("--img_path", type=str, help="path of image to train, if None", default=None, required=True)
     parser.add_argument("--output_path", type=str, help="output file's saving path", default="./output", required=False)
     parser.add_argument("--lr", type=float, help="learning rate", default=0.0001, required=False)
@@ -72,14 +70,19 @@ def main(config):
     idx2class = dict((idx, cla) for cla, idx in class2idx.items())
 
     num_class = len(class2idx)
-    if config.model_version == "v2":
-        model = MobileNetV2(num_class)
-    elif config.model_version == "v3-small":
-        model = mobilenet_v3_small(num_class)
-    elif config.model_version == "v3-large":
-        model = mobilenet_v3_large(num_class)
-    else:
-        raise ValueError("model version error")
+
+    img_size = {"B0": 224,
+            "B1": 240,
+            "B2": 260,
+            "B3": 300,
+            "B4": 380,
+            "B5": 456,
+            "B6": 528,
+            "B7": 600}
+
+    model_list = [efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4,  efficientnet_b5, efficientnet_b6, efficientnet_b7]
+
+    model = model_list[int(config.model_version[1])](num_class)
 
     if config.linear_eval:
         assert config.pretrained_path, "do linear evaluation need pretrained pth file"
@@ -92,7 +95,7 @@ def main(config):
         model.load_state_dict(state_dict, strict=False)
 
         for name, para in model.named_parameters():  # 冻结非 fc 层的参数
-            if "classifier" not in name:
+            if "classifier" not in name and "features.top" not in name:
                 para.requires_grad = False      
 
         model.to(device)        
