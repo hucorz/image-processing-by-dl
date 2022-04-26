@@ -6,7 +6,7 @@
 
 pth 文件 pytorch 官方并没有给，[大佬](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing)有给从 tensorflow 那边转过来的，[这里](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/blob/master/pytorch_classification/Test9_efficientNet/train.py)
 
-使用预训练的 B0 的 pth 文件，lr=0.0001，batch_size=32，训练 15 个 epoch 的结果(我这里训练 15 个epoch 都不及之前训练 5 个，不知道是不是我的 model 有错误)：
+使用预训练的 B0 的 pth 文件，lr=0.0001，batch_size=32，训练 15 个 epoch 的结果(我这里训练 15 个epoch 都不及之前训练 5 个，而且一开始的 val_acc 好低，然后上升的很快，不知道是不是我的 model 有错误)：
 
 ![](./output/result.png)
 
@@ -58,7 +58,7 @@ v2 的改动与贡献：
 
 -   采用非均匀的缩放策略（不同等的放大每个 stage）
 -   提出了改进的渐进学习方法（progressive training setting），根据训练图像尺寸动态调节正则方法（Dropout，RandAugment， Mixup）；图像尺寸变大时上面三项需要变强
--   使用较小的 expansion_ratio 和 小的 kernel_size
+-   使用较小的 expansion_ratio 和 小的 kernel_size（3x3）
 -   V2-S 移除了 v1 中的 stage8
 
 MBConv1(v2)-S architecture: M 和 L 比 S 多一个 stage
