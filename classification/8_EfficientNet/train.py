@@ -38,17 +38,26 @@ def main(config):
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
     
+    img_size = {"B0": 224,
+        "B1": 240,
+        "B2": 260,
+        "B3": 300,
+        "B4": 380,
+        "B5": 456,
+        "B6": 528,
+        "B7": 600}
+
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     transform = {
         "train":transforms.Compose([
-           transforms.RandomResizedCrop(224),
+           transforms.RandomResizedCrop(img_size[config.model_version]),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
         ]),
         "val": transforms.Compose([
-            transforms.Resize(256),
-            transforms.CenterCrop(224),
+            transforms.Resize(img_size[config.model_version]),
+            transforms.CenterCrop(img_size[config.model_version]),
             transforms.ToTensor(),
             normalize,
         ])
@@ -70,15 +79,6 @@ def main(config):
     idx2class = dict((idx, cla) for cla, idx in class2idx.items())
 
     num_class = len(class2idx)
-
-    img_size = {"B0": 224,
-            "B1": 240,
-            "B2": 260,
-            "B3": 300,
-            "B4": 380,
-            "B5": 456,
-            "B6": 528,
-            "B7": 600}
 
     model_list = [efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4,  efficientnet_b5, efficientnet_b6, efficientnet_b7]
 

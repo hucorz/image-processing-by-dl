@@ -13,9 +13,13 @@ cuda: 10.2
 
 ## 参考
 
-主要是跟着这位大佬的库：https://github.com/WZMIAOMIAO/deep-learning-for-image-processing
+[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing)（代码都是这位大佬来的）
 
-https://tangshusen.me/Dive-into-DL-PyTorch/#/
+[《动手学习深度学习》](https://tangshusen.me/Dive-into-DL-PyTorch/#/)（花书 pytorch 版）
+
+[《动手学习深度学习》](https://zh.d2l.ai/index.html)（花书官网，已有 pytorch 版）
+
+[paper reading](https://github.com/mli/paper-reading)（李沐）
 
 ## windows 需要注意的地方
 
@@ -38,5 +42,5 @@ train_set = torchvision.datasets.FashionMNIST(root='~/Datasets/FashionMNIST', tr
 
 ## 其他
 
-部分图片不开梯子会无法显示，因为 md 中用了 相对路径
+部分图片不开梯子会无法显示，貌似是因为 md 中用了 相对路径
 
