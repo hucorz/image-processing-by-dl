@@ -6,12 +6,17 @@
 
 pth 文件 pytorch 官方并没有给，[大佬](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing)有给从 tensorflow 那边转过来的，[这里](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/blob/master/pytorch_classification/Test9_efficientNet/train.py)
 
-使用预训练的 B0 的 pth 文件，lr=0.0001，batch_size=32，训练 15 个 epoch 的结果(我这里训练 15 个epoch 都不及之前训练 5 个，而且一开始的 val_acc 好低，然后上升的很快，不知道是不是我的 model 有错误)：
+使用预训练的 B0 的 pth 文件，lr=0.0001，batch_size=32，训练 5 个 epoch 的结果：
 
-![](./output/result.png)
+![](./output/result_1.png)
 
 ### v2
 
+[权重文件来源](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_classification/Test11_efficientnetV2)
+
+使用预训练的 s 的 pth 文件，lr=0.0001，batch_size=32，训练 5 个 epoch 的结果：
+
+![](./output/result_2.png)
 
 
 ## Model
@@ -28,7 +33,7 @@ EfficientNet 十分占显存
 
 
 
-MBConv1(v1) 的 1 表示 Mobile Block 的倍率因子；1 时 block 不需要第一个 1x1 conv 去升维
+MBConv1 的 1 表示 Mobile Block 的倍率因子；为 1 时 block 不需要第一个 1x1 conv 去升维
 
 shortcut 操作只有输出 CxHxW 和 输入 CxHxW 完全一样才有
 

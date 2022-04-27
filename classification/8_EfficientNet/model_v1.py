@@ -165,7 +165,7 @@ class InvertedResidual(nn.Module):
             cnf.out_channel,
             kernel_size=1,
             norm_layer=norm_layer,
-            activation_layer=activation_layer)})
+            activation_layer=nn.Identity)})  # 不用激活函数
 
         self.block = nn.Sequential(layers)
         # self.out_channels = cnf.out_channel

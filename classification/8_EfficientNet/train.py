@@ -1,6 +1,7 @@
 import argparse
 import pdb
 import os
+from xmlrpc.client import boolean
 import numpy as np
 from tqdm import tqdm
 
@@ -16,12 +17,16 @@ import torchvision.models.mobilenetv3
 
 import matplotlib.pyplot as plt
 
-from model import efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4
-from model import efficientnet_b5, efficientnet_b6, efficientnet_b7
+from model_v1 import efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4
+from model_v1 import efficientnet_b5, efficientnet_b6, efficientnet_b7
+from model_v2 import efficientnetv2_s, efficientnetv2_m, efficientnetv2_l
+# from model import efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4
 
 def get_config():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--model_version", help="B0 - B7", type=str, required=True, choices=["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"])
+    parser.add_argument("--v1", help="use efficientnet v1", action="store_true")
+    parser.add_argument("--v2", help="use efficientnet v2", action="store_true")
+    parser.add_argument("--model_version", help="if v1, B0 - B7; if v2, [s, m, l]", type=str, required=True, choices=["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7", "s", "m", "l"])
     parser.add_argument("--img_path", type=str, help="path of image to train, if None", default=None, required=True)
     parser.add_argument("--output_path", type=str, help="output file's saving path", default="./output", required=False)
     parser.add_argument("--lr", type=float, help="learning rate", default=0.0001, required=False)
@@ -37,26 +42,39 @@ def main(config):
     print(config)
 
     device = "cuda" if torch.cuda.is_available() else "cpu"
+    # v1 v2 只能二选一
+    assert not (config.v1 and config.v2)  
+    assert config.v1 or config.v2
     
-    img_size = {"B0": 224,
-        "B1": 240,
-        "B2": 260,
-        "B3": 300,
-        "B4": 380,
-        "B5": 456,
-        "B6": 528,
-        "B7": 600}
+    if config.v1:
+        assert config.model_version in ["B0", "B1", "B2", "B3", "B4", "B5", "B6", "B7"]
+    elif config.v2:
+        assert config.model_version in ["s", "m", 'l']
+
+    if config.v1:
+        img_size = {"B0": [224, 224], # train_size, val_size
+            "B1": [240, 240],
+            "B2": [260, 260],
+            "B3": [300, 300],
+            "B4": [380, 380],
+            "B5": [456, 456], 
+            "B6": [528, 528],
+            "B7": [600, 600]}
+    elif config.v2:
+        img_size = {"s": [300, 384],  # train_size, val_size
+            "m": [384, 480],
+            "l": [384, 480]}
 
     normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     transform = {
         "train":transforms.Compose([
-           transforms.RandomResizedCrop(img_size[config.model_version]),
+           transforms.RandomResizedCrop(img_size[config.model_version][0]),
             transforms.RandomHorizontalFlip(),
             transforms.ToTensor(),
             normalize,
         ]),
         "val": transforms.Compose([
-            transforms.Resize(img_size[config.model_version]),
+            transforms.Resize(img_size[config.model_version][1]),
             transforms.CenterCrop(img_size[config.model_version]),
             transforms.ToTensor(),
             normalize,
@@ -80,9 +98,16 @@ def main(config):
 
     num_class = len(class2idx)
 
-    model_list = [efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4,  efficientnet_b5, efficientnet_b6, efficientnet_b7]
-
-    model = model_list[int(config.model_version[1])](num_class)
+    if config.v1:
+        model_list = [efficientnet_b0, efficientnet_b1, efficientnet_b2, efficientnet_b3, efficientnet_b4,  efficientnet_b5, efficientnet_b6, efficientnet_b7]
+        model = model_list[int(config.model_version[1])](num_class)
+    elif config.v2:
+        if config.model_version == 's':
+            model = efficientnetv2_s(num_class)
+        elif config.model_version == 'm':
+            model = efficientnetv2_m(num_class)
+        elif config.model_version == 'l':
+            model = efficientnetv2_l(num_class)
 
     if config.linear_eval:
         assert config.pretrained_path, "do linear evaluation need pretrained pth file"
@@ -95,7 +120,7 @@ def main(config):
         model.load_state_dict(state_dict, strict=False)
 
         for name, para in model.named_parameters():  # 冻结非 fc 层的参数
-            if "classifier" not in name and "features.top" not in name:
+            if "classifier" not in name and "features.top" not in name and "head" not in name:
                 para.requires_grad = False      
 
         model.to(device)        
