@@ -13,13 +13,13 @@ cuda: 10.2
 
 ## 参考
 
-[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing)（代码都是这位大佬来的）
+[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing) （本项目的代码和图片基本来自这位大佬的库和博客）
 
-[《动手学习深度学习》](https://tangshusen.me/Dive-into-DL-PyTorch/#/)（花书 pytorch 版）
+[花书 pytorch 版](https://tangshusen.me/Dive-into-DL-PyTorch/#/)
 
-[《动手学习深度学习》](https://zh.d2l.ai/index.html)（花书官网，已有 pytorch 版）
+[花书官网](https://zh.d2l.ai/index.html) 
 
-[paper reading](https://github.com/mli/paper-reading)（李沐）
+[paper reading](https://github.com/mli/paper-reading) 
 
 ## windows 需要注意的地方
 
