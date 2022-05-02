@@ -2,6 +2,12 @@
 
 源码来自 rwightman，我在 WZMIAOMIAO 注释的基础上加了自己的注释
 
+## Conclusion
+
+使用预训练的 Vit-B 的 pth 文件，lr=0.0001，batch_size=32，训练 5 个 epoch 的结果：
+
+![](./output/result.png)
+
 ## Model
 
 参考：https://blog.csdn.net/qq_37541097/article/details/118242600
