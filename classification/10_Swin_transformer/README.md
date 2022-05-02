@@ -47,13 +47,14 @@ W-MSA 的引入是为了减小计算量；MSA 是直接对整个 feature map 做
 
 为了防止信息乱窜，使用了 `masked MSA`
 
-以下图区域 5 和 3 为例，5 和 3 本来没有关系，可以在计算出 $\alpha$ 后对 一些表示 5 和 3 区域 的 $\alpha$ 减去 100，经过 softmax 后得到的权重基本为 0；
-
-计算完成后数据会回来原来的位置上
+以下图区域 5 和 3 为例，5 和 3 本来没有关系，可以在计算出 $\alpha$ 后对 一些表示 5 和 3 区域 的 $\alpha$ 减去 100，经过 softmax 后得到的权重基本为 0；计算完成后数据会回来原来的位置上
 
 <img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/Swin_Transformer_7.png" style="zoom: 80%;" />
 
 ### Relative Position Bias
 
-略
-
+相对位置偏置，加在 Attention 的公式中
+$$
+Attention(Q,K,V)=SoftMax(\frac{QK^T}{\sqrt{d}}+B)V
+$$
+具体实现略
