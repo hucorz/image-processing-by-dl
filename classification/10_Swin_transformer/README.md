@@ -13,13 +13,17 @@ Swin Transformer 与 Vit 的对比：
 
 <img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/Swin_Transformer_1.png" style="zoom: 80%;" />
 
-整体结构：
+整体流程：
 
 <img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/Swin_Transformer_2.png" style="zoom: 80%;" />
 
 -   Patch Partition：4x4x3 个像素为一个 Patch，然后展平，[H, W, 3] -> [H/4, W/4, 48]；用 Conv 实现
 -   然后通过 4 个 stage：Stage 1 先经过一个 Linear Embedding，后面的 Stage 先经过一个 Patch Merging 进行下采样；每个 Block 的数量都是偶数，因为 W-MSA 和 SW-MSA 是成对出现的
 -   最后接上 Layer Norm，全局池化和全连接层
+
+具体配置：
+
+<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/classification/Swin_Transformer_8.png" style="zoom: 80%;" />
 
 ### Patch Merging
 
