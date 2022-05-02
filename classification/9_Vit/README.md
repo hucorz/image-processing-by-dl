@@ -1,5 +1,7 @@
 # Vit
 
+源码来自 rwightman，我在 WZMIAOMIAO 注释的基础上加了自己的注释
+
 ## Model
 
 参考：https://blog.csdn.net/qq_37541097/article/details/118242600
