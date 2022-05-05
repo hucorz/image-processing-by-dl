@@ -49,6 +49,12 @@ train_set = torchvision.datasets.FashionMNIST(root='~/Datasets/FashionMNIST', tr
 
 [大致参考流程](https://github.com/hucorz/image-processing-by-dl/blob/main/others/google_colab_example.ipynb)
 
+## Tiny Imagenet 200 数据集
+
+下载地址： http://cs231n.stanford.edu/tiny-imagenet-200.zip
+
+预处理脚本：./data/data_preprocess.py
+
 ## 其他
 
 部分图片不开梯子会无法显示，貌似是因为 md 中用了 相对路径

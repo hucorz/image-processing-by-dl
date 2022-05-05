@@ -1,3 +1,4 @@
 *.pth
 *.npy
 __pycache__
+data/tiny-imagenet-200
