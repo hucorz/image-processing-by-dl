@@ -1,5 +1,6 @@
 # image-processing-by-dl
-studying recording about image processing by deep learning
+
+Studying recording about image processing by deep learning based on Pytorch and OpenMMLab
 
 ## My Environments
 
@@ -9,6 +10,14 @@ python: 3.8.0
 pytorch: 1.8.2
 torchvision: 0.9.2
 cuda: 10.2
+mmcv-full: 1.5.0
+mmclassification: 0.23.0
+```
+
+根据 mmcls 官方的 colab 教程下载版本对应的 mmcv-full 的命令：
+
+```python
+pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu102/torch1.8.2/index.html 
 ```
 
 ## 参考
