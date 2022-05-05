@@ -1,6 +1,10 @@
 # Swin-Transformer
 
+代码和 Vit 的一样，在 WZMIAOMIAO 仓库里代码的基础上加了自己的注释
+
 ## Conclusion
+
+![](./output/result.png)
 
 ## Model
 
