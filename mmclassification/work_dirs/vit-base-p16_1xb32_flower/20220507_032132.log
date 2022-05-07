@@ -1,0 +1,717 @@
+2022-05-07 03:21:32,760 - mmcls - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.7.13 (default, Apr 24 2022, 01:04:09) [GCC 7.5.0]
+CUDA available: True
+GPU 0: Tesla K80
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 11.1, V11.1.105
+GCC: x86_64-linux-gnu-gcc (Ubuntu 7.5.0-3ubuntu1~18.04) 7.5.0
+PyTorch: 1.11.0+cu113
+PyTorch compiling details: PyTorch built with:
+  - GCC 7.3
+  - C++ Version: 201402
+  - Intel(R) Math Kernel Library Version 2020.0.0 Product Build 20191122 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.5.2 (Git Hash a9302535553c73243c632ad3c4c80beec3d19a1e)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.3
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86
+  - CuDNN 8.2
+  - Magma 2.5.2
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.3, CUDNN_VERSION=8.2.0, CXX_COMPILER=/opt/rh/devtoolset-7/root/usr/bin/c++, CXX_FLAGS= -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -fopenmp -DNDEBUG -DUSE_KINETO -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -DEDGE_PROFILER_USE_KINETO -O2 -fPIC -Wno-narrowing -Wall -Wextra -Werror=return-type -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wno-sign-compare -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-unused-local-typedefs -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_VERSION=1.11.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=OFF, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+TorchVision: 0.12.0+cu113
+OpenCV: 4.1.2
+MMCV: 1.5.0
+MMCV Compiler: GCC 7.3
+MMCV CUDA Compiler: 11.3
+MMClassification: 0.23.0+7c5ddb1
+------------------------------------------------------------
+
+2022-05-07 03:21:32,760 - mmcls - INFO - Distributed training: False
+2022-05-07 03:21:33,670 - mmcls - INFO - Config:
+model = dict(
+    type='ImageClassifier',
+    backbone=dict(
+        type='VisionTransformer',
+        arch='b',
+        img_size=224,
+        patch_size=16,
+        drop_rate=0.1,
+        init_cfg=[
+            dict(
+                type='Pretrained',
+                checkpoint=
+                'checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth',
+                prefix='backbone')
+        ]),
+    neck=None,
+    head=dict(
+        type='VisionTransformerClsHead',
+        num_classes=5,
+        in_channels=768,
+        loss=dict(
+            type='LabelSmoothLoss', label_smooth_val=0.1,
+            mode='classy_vision'),
+        topk=(1, )))
+optimizer = dict(type='SGD', lr=0.005, momentum=0.9, weight_decay=0.0001)
+optimizer_config = dict(grad_clip=None)
+lr_config = dict(policy='step', step=3, gamma=0.1)
+runner = dict(type='EpochBasedRunner', max_epochs=5)
+checkpoint_config = dict(interval=1)
+log_config = dict(interval=10, hooks=[dict(type='TextLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = 'checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth'
+resume_from = None
+workflow = [('train', 1)]
+checkpoint_path = 'checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth'
+dataset_type = 'ImageNet'
+img_norm_cfg = dict(
+    mean=[123.675, 116.28, 103.53], std=[58.395, 57.12, 57.375], to_rgb=True)
+train_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='RandomResizedCrop', size=224),
+    dict(type='RandomFlip', flip_prob=0.5, direction='horizontal'),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='ImageToTensor', keys=['img']),
+    dict(type='ToTensor', keys=['gt_label']),
+    dict(type='Collect', keys=['img', 'gt_label'])
+]
+test_pipeline = [
+    dict(type='LoadImageFromFile'),
+    dict(type='Resize', size=(256, -1)),
+    dict(type='CenterCrop', crop_size=224),
+    dict(
+        type='Normalize',
+        mean=[123.675, 116.28, 103.53],
+        std=[58.395, 57.12, 57.375],
+        to_rgb=True),
+    dict(type='ImageToTensor', keys=['img']),
+    dict(type='Collect', keys=['img'])
+]
+data = dict(
+    samples_per_gpu=32,
+    workers_per_gpu=4,
+    train=dict(
+        type='ImageNet',
+        data_prefix='data/flower_data/train',
+        ann_file='data/flower_data/train_annotations.txt',
+        classes='data/flower_data/classes.txt',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='RandomResizedCrop', size=224),
+            dict(type='RandomFlip', flip_prob=0.5, direction='horizontal'),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='ToTensor', keys=['gt_label']),
+            dict(type='Collect', keys=['img', 'gt_label'])
+        ]),
+    val=dict(
+        type='ImageNet',
+        data_prefix='data/flower_data/val',
+        ann_file='data/flower_data/val_annotations.txt',
+        classes='data/flower_data/classes.txt',
+        pipeline=[
+            dict(type='LoadImageFromFile'),
+            dict(type='Resize', size=(256, -1)),
+            dict(type='CenterCrop', crop_size=224),
+            dict(
+                type='Normalize',
+                mean=[123.675, 116.28, 103.53],
+                std=[58.395, 57.12, 57.375],
+                to_rgb=True),
+            dict(type='ImageToTensor', keys=['img']),
+            dict(type='Collect', keys=['img'])
+        ]))
+evaluation = dict(metric='accuracy', metric_options=dict(topk=(1, )))
+work_dir = './work_dirs/vit-base-p16_1xb32_flower'
+gpu_ids = [0]
+
+2022-05-07 03:21:33,670 - mmcls - INFO - Set random seed to 998345085, deterministic: False
+2022-05-07 03:21:34,485 - mmcls - INFO - initialize VisionTransformer with init_cfg [{'type': 'Pretrained', 'checkpoint': 'checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth', 'prefix': 'backbone'}]
+2022-05-07 03:21:34,699 - mmcls - INFO - Resize the pos_embed shape from torch.Size([1, 577, 768]) to torch.Size([1, 197, 768]).
+2022-05-07 03:21:35,775 - mmcls - INFO - initialize VisionTransformerClsHead with init_cfg {'type': 'Constant', 'layer': 'Linear', 'val': 0}
+Name of parameter - Initialization information
+
+backbone.cls_token - torch.Size([1, 1, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.pos_embed - torch.Size([1, 197, 768]): 
+Initialized by user-defined `init_weights` in VisionTransformer  
+
+backbone.patch_embed.projection.weight - torch.Size([768, 3, 16, 16]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.patch_embed.projection.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.0.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.0.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.0.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.0.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.1.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.1.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.1.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.1.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.1.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.1.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.1.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.1.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.1.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.1.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.1.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.1.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.2.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.2.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.2.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.2.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.2.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.2.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.2.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.2.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.2.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.2.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.2.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.2.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.3.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.3.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.3.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.3.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.3.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.3.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.3.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.3.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.3.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.3.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.3.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.3.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.4.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.4.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.4.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.4.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.4.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.4.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.4.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.4.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.4.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.4.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.4.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.4.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.5.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.5.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.5.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.5.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.5.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.5.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.5.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.5.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.5.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.5.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.5.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.5.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.6.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.6.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.6.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.6.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.6.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.6.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.6.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.6.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.6.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.6.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.6.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.6.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.7.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.7.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.7.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.7.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.7.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.7.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.7.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.7.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.7.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.7.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.7.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.7.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.8.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.8.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.8.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.8.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.8.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.8.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.8.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.8.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.8.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.8.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.8.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.8.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.9.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.9.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.9.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.9.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.9.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.9.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.9.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.9.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.9.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.9.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.9.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.9.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.10.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.10.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.10.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.10.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.10.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.10.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.10.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.10.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.10.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.10.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.10.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.10.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.11.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.11.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.11.attn.qkv.weight - torch.Size([2304, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.11.attn.qkv.bias - torch.Size([2304]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.11.attn.proj.weight - torch.Size([768, 768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.11.attn.proj.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.11.ln2.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.11.ln2.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.layers.11.ffn.layers.0.0.weight - torch.Size([3072, 768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.11.ffn.layers.0.0.bias - torch.Size([3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.11.ffn.layers.1.weight - torch.Size([768, 3072]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.layers.11.ffn.layers.1.bias - torch.Size([768]): 
+Initialized by user-defined `init_weights` in TransformerEncoderLayer  
+
+backbone.ln1.weight - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+backbone.ln1.bias - torch.Size([768]): 
+PretrainedInit: load from checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth 
+
+head.layers.head.weight - torch.Size([5, 768]): 
+ConstantInit: val=0, bias=0 
+
+head.layers.head.bias - torch.Size([5]): 
+ConstantInit: val=0, bias=0 
+2022-05-07 03:21:38,998 - mmcls - INFO - load checkpoint from local path: checkpoint/vit-base-p16_in21k-pre-3rdparty_ft-64xb64_in1k-384_20210928-98e8652b.pth
+2022-05-07 03:21:39,133 - mmcls - INFO - Resize the pos_embed shape from torch.Size([1, 577, 768]) to torch.Size([1, 197, 768]).
+2022-05-07 03:21:39,461 - mmcls - WARNING - The model and loaded state dict do not match exactly
+
+size mismatch for head.layers.head.weight: copying a param with shape torch.Size([1000, 768]) from checkpoint, the shape in current model is torch.Size([5, 768]).
+size mismatch for head.layers.head.bias: copying a param with shape torch.Size([1000]) from checkpoint, the shape in current model is torch.Size([5]).
+2022-05-07 03:21:39,484 - mmcls - INFO - Start running, host: root@b1eef2b90c88, work_dir: /content/mmclassification/work_dirs/vit-base-p16_1xb32_flower
+2022-05-07 03:21:39,485 - mmcls - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) StepLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) OptimizerHook                      
+(NORMAL      ) CheckpointHook                     
+(LOW         ) IterTimerHook                      
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(LOW         ) EvalHook                           
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_epoch:
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+after_run:
+(VERY_LOW    ) TextLoggerHook                     
+ -------------------- 
+2022-05-07 03:21:39,485 - mmcls - INFO - workflow: [('train', 1)], max: 5 epochs
+2022-05-07 03:21:39,485 - mmcls - INFO - Checkpoints will be saved to /content/mmclassification/work_dirs/vit-base-p16_1xb32_flower by HardDiskBackend.
+2022-05-07 03:22:07,146 - mmcls - INFO - Epoch [1][10/104]	lr: 5.000e-03, eta: 0:22:38, time: 2.665, data_time: 0.284, memory: 5690, loss: 1.4233
+2022-05-07 03:22:31,899 - mmcls - INFO - Epoch [1][20/104]	lr: 5.000e-03, eta: 0:21:24, time: 2.475, data_time: 0.102, memory: 5690, loss: 1.4710
+2022-05-07 03:22:56,703 - mmcls - INFO - Epoch [1][30/104]	lr: 5.000e-03, eta: 0:20:44, time: 2.480, data_time: 0.103, memory: 5690, loss: 1.5046
+2022-05-07 03:23:21,511 - mmcls - INFO - Epoch [1][40/104]	lr: 5.000e-03, eta: 0:20:12, time: 2.481, data_time: 0.102, memory: 5690, loss: 1.1868
+2022-05-07 03:23:46,336 - mmcls - INFO - Epoch [1][50/104]	lr: 5.000e-03, eta: 0:19:42, time: 2.483, data_time: 0.102, memory: 5690, loss: 1.1025
+2022-05-07 03:24:11,157 - mmcls - INFO - Epoch [1][60/104]	lr: 5.000e-03, eta: 0:19:14, time: 2.482, data_time: 0.102, memory: 5690, loss: 1.0252
+2022-05-07 03:24:35,976 - mmcls - INFO - Epoch [1][70/104]	lr: 5.000e-03, eta: 0:18:48, time: 2.482, data_time: 0.102, memory: 5690, loss: 1.0897
+2022-05-07 03:25:00,797 - mmcls - INFO - Epoch [1][80/104]	lr: 5.000e-03, eta: 0:18:21, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.8835
+2022-05-07 03:25:25,621 - mmcls - INFO - Epoch [1][90/104]	lr: 5.000e-03, eta: 0:17:55, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.8676
+2022-05-07 03:25:50,463 - mmcls - INFO - Epoch [1][100/104]	lr: 5.000e-03, eta: 0:17:29, time: 2.484, data_time: 0.102, memory: 5690, loss: 0.8143
+2022-05-07 03:25:58,452 - mmcls - INFO - Saving checkpoint at 1 epochs
+2022-05-07 03:26:14,540 - mmcls - INFO - Epoch(val) [1][12]	accuracy_top-1: 91.4835
+2022-05-07 03:26:41,723 - mmcls - INFO - Epoch [2][10/104]	lr: 5.000e-03, eta: 0:16:23, time: 2.616, data_time: 0.241, memory: 5690, loss: 0.7327
+2022-05-07 03:27:06,500 - mmcls - INFO - Epoch [2][20/104]	lr: 5.000e-03, eta: 0:16:00, time: 2.478, data_time: 0.102, memory: 5690, loss: 0.6873
+2022-05-07 03:27:31,294 - mmcls - INFO - Epoch [2][30/104]	lr: 5.000e-03, eta: 0:15:38, time: 2.479, data_time: 0.102, memory: 5690, loss: 0.6633
+2022-05-07 03:27:56,099 - mmcls - INFO - Epoch [2][40/104]	lr: 5.000e-03, eta: 0:15:15, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.6361
+2022-05-07 03:28:20,934 - mmcls - INFO - Epoch [2][50/104]	lr: 5.000e-03, eta: 0:14:52, time: 2.483, data_time: 0.102, memory: 5690, loss: 0.6137
+2022-05-07 03:28:45,761 - mmcls - INFO - Epoch [2][60/104]	lr: 5.000e-03, eta: 0:14:28, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.6229
+2022-05-07 03:29:10,594 - mmcls - INFO - Epoch [2][70/104]	lr: 5.000e-03, eta: 0:14:05, time: 2.484, data_time: 0.102, memory: 5690, loss: 0.7005
+2022-05-07 03:29:35,420 - mmcls - INFO - Epoch [2][80/104]	lr: 5.000e-03, eta: 0:13:41, time: 2.483, data_time: 0.102, memory: 5690, loss: 0.6800
+2022-05-07 03:30:00,235 - mmcls - INFO - Epoch [2][90/104]	lr: 5.000e-03, eta: 0:13:17, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.6033
+2022-05-07 03:30:25,048 - mmcls - INFO - Epoch [2][100/104]	lr: 5.000e-03, eta: 0:12:53, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.5866
+2022-05-07 03:30:33,021 - mmcls - INFO - Saving checkpoint at 2 epochs
+2022-05-07 03:30:50,005 - mmcls - INFO - Epoch(val) [2][12]	accuracy_top-1: 94.2308
+2022-05-07 03:31:17,321 - mmcls - INFO - Epoch [3][10/104]	lr: 5.000e-03, eta: 0:12:08, time: 2.630, data_time: 0.249, memory: 5690, loss: 0.5776
+2022-05-07 03:31:42,142 - mmcls - INFO - Epoch [3][20/104]	lr: 5.000e-03, eta: 0:11:45, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.5450
+2022-05-07 03:32:06,974 - mmcls - INFO - Epoch [3][30/104]	lr: 5.000e-03, eta: 0:11:21, time: 2.483, data_time: 0.102, memory: 5690, loss: 0.5765
+2022-05-07 03:32:31,781 - mmcls - INFO - Epoch [3][40/104]	lr: 5.000e-03, eta: 0:10:58, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.5955
+2022-05-07 03:32:56,572 - mmcls - INFO - Epoch [3][50/104]	lr: 5.000e-03, eta: 0:10:34, time: 2.479, data_time: 0.102, memory: 5690, loss: 0.5583
+2022-05-07 03:33:21,385 - mmcls - INFO - Epoch [3][60/104]	lr: 5.000e-03, eta: 0:10:11, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.5914
+2022-05-07 03:33:46,206 - mmcls - INFO - Epoch [3][70/104]	lr: 5.000e-03, eta: 0:09:47, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.6035
+2022-05-07 03:34:11,023 - mmcls - INFO - Epoch [3][80/104]	lr: 5.000e-03, eta: 0:09:23, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.5929
+2022-05-07 03:34:35,833 - mmcls - INFO - Epoch [3][90/104]	lr: 5.000e-03, eta: 0:08:59, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.6107
+2022-05-07 03:35:00,610 - mmcls - INFO - Epoch [3][100/104]	lr: 5.000e-03, eta: 0:08:35, time: 2.478, data_time: 0.102, memory: 5690, loss: 0.5160
+2022-05-07 03:35:08,572 - mmcls - INFO - Saving checkpoint at 3 epochs
+2022-05-07 03:35:23,518 - mmcls - INFO - Epoch(val) [3][12]	accuracy_top-1: 96.4286
+2022-05-07 03:35:50,875 - mmcls - INFO - Epoch [4][10/104]	lr: 5.000e-04, eta: 0:07:56, time: 2.634, data_time: 0.259, memory: 5690, loss: 0.5114
+2022-05-07 03:36:15,664 - mmcls - INFO - Epoch [4][20/104]	lr: 5.000e-04, eta: 0:07:33, time: 2.479, data_time: 0.102, memory: 5690, loss: 0.5302
+2022-05-07 03:36:40,470 - mmcls - INFO - Epoch [4][30/104]	lr: 5.000e-04, eta: 0:07:09, time: 2.480, data_time: 0.102, memory: 5690, loss: 0.5534
+2022-05-07 03:37:05,288 - mmcls - INFO - Epoch [4][40/104]	lr: 5.000e-04, eta: 0:06:45, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.4943
+2022-05-07 03:37:30,106 - mmcls - INFO - Epoch [4][50/104]	lr: 5.000e-04, eta: 0:06:21, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.5173
+2022-05-07 03:37:54,914 - mmcls - INFO - Epoch [4][60/104]	lr: 5.000e-04, eta: 0:05:57, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.4979
+2022-05-07 03:38:19,712 - mmcls - INFO - Epoch [4][70/104]	lr: 5.000e-04, eta: 0:05:33, time: 2.480, data_time: 0.102, memory: 5690, loss: 0.5160
+2022-05-07 03:38:44,509 - mmcls - INFO - Epoch [4][80/104]	lr: 5.000e-04, eta: 0:05:09, time: 2.480, data_time: 0.102, memory: 5690, loss: 0.4720
+2022-05-07 03:39:09,314 - mmcls - INFO - Epoch [4][90/104]	lr: 5.000e-04, eta: 0:04:45, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.4961
+2022-05-07 03:39:34,130 - mmcls - INFO - Epoch [4][100/104]	lr: 5.000e-04, eta: 0:04:21, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.5077
+2022-05-07 03:39:42,086 - mmcls - INFO - Saving checkpoint at 4 epochs
+2022-05-07 03:39:57,136 - mmcls - INFO - Epoch(val) [4][12]	accuracy_top-1: 97.5275
+2022-05-07 03:40:24,442 - mmcls - INFO - Epoch [5][10/104]	lr: 5.000e-04, eta: 0:03:46, time: 2.629, data_time: 0.249, memory: 5690, loss: 0.5013
+2022-05-07 03:40:49,259 - mmcls - INFO - Epoch [5][20/104]	lr: 5.000e-04, eta: 0:03:22, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.4632
+2022-05-07 03:41:14,068 - mmcls - INFO - Epoch [5][30/104]	lr: 5.000e-04, eta: 0:02:58, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.4964
+2022-05-07 03:41:38,878 - mmcls - INFO - Epoch [5][40/104]	lr: 5.000e-04, eta: 0:02:34, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.4781
+2022-05-07 03:42:03,675 - mmcls - INFO - Epoch [5][50/104]	lr: 5.000e-04, eta: 0:02:10, time: 2.480, data_time: 0.102, memory: 5690, loss: 0.4777
+2022-05-07 03:42:28,484 - mmcls - INFO - Epoch [5][60/104]	lr: 5.000e-04, eta: 0:01:46, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.4797
+2022-05-07 03:42:53,302 - mmcls - INFO - Epoch [5][70/104]	lr: 5.000e-04, eta: 0:01:22, time: 2.482, data_time: 0.102, memory: 5690, loss: 0.5010
+2022-05-07 03:43:18,114 - mmcls - INFO - Epoch [5][80/104]	lr: 5.000e-04, eta: 0:00:57, time: 2.481, data_time: 0.102, memory: 5690, loss: 0.4471
+2022-05-07 03:43:42,915 - mmcls - INFO - Epoch [5][90/104]	lr: 5.000e-04, eta: 0:00:33, time: 2.480, data_time: 0.102, memory: 5690, loss: 0.4399
+2022-05-07 03:44:07,699 - mmcls - INFO - Epoch [5][100/104]	lr: 5.000e-04, eta: 0:00:09, time: 2.479, data_time: 0.102, memory: 5690, loss: 0.4577
+2022-05-07 03:44:15,665 - mmcls - INFO - Saving checkpoint at 5 epochs
+2022-05-07 03:44:30,779 - mmcls - INFO - Epoch(val) [5][12]	accuracy_top-1: 97.5275
