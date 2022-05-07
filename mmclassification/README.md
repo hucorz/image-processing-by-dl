@@ -14,8 +14,8 @@ Vit-Base-P16_1xb32_flower.ipynb 是参照官方的 colab 教程做的 Vit-B16 �
 
 只训练 5 epoch，具体看配置文件；预训练权重在 [mmclassification官方文档](https://mmclassification.readthedocs.io/zh_CN/latest/model_zoo.html)
 
-| Model    | Top-1 | Config                                                       |
-| -------- | ----- | ------------------------------------------------------------ |
-| ResNet50 | 93.96 | [config](./configs/flower_data/resnet50_1xb32_flower.py)     |
-| Vit-B16  | 97.53 | [config](./configs/flower_data/vit-base-p16_1xb32_flower.py) |
+| Model    | Top-1 | Config                                                       | Log                                                          |
+| -------- | ----- | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| ResNet50 | 93.96 | [config](./configs/flower_data/resnet50_1xb32_flower.py)     | [log](work_dirs/resnet50_1xb32_flower/20220507_103719.log)   |
+| Vit-B16  | 97.53 | [config](./configs/flower_data/vit-base-p16_1xb32_flower.py) | [log](work_dirs/vit-base-p16_1xb32_flower/20220507_032132.log) |
 
