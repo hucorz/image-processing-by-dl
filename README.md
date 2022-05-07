@@ -22,7 +22,7 @@ pip install mmcv-full -f https://download.openmmlab.com/mmcv/dist/cu102/torch1.8
 
 ## 参考
 
-[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing) （本项目的代码和图片基本来自这位大佬的库和博客）
+[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing) （本项目的 Pytorch 代码和图片基本来自这位大佬的库和博客）
 
 [花书 pytorch 版](https://tangshusen.me/Dive-into-DL-PyTorch/#/)
 
@@ -49,7 +49,9 @@ train_set = torchvision.datasets.FashionMNIST(root='~/Datasets/FashionMNIST', tr
 
 前提：会翻墙
 
-[大致参考流程](https://github.com/hucorz/image-processing-by-dl/blob/main/others/google_colab_example.ipynb)
+[Pytorch 参考流程](./classification/google_colab_example.ipynb)
+
+[OpenMMLab 参考流程](./mmclassification/Vit-Base-P16_1xb32_flower.ipynb)
 
 ## 数据集
 
