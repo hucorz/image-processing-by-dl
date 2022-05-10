@@ -3,3 +3,4 @@
 __pycache__
 data/flower_data
 mmclassification
+object_detection/data
