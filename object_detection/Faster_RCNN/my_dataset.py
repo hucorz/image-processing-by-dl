@@ -201,6 +201,11 @@ class VOCDataSet(Dataset):
 
     @staticmethod
     def collate_fn(batch):
+        '''
+        在 DataLoader 中需要使用这个方法，
+        传入 args 的是 Dataset 的 getitem 的返回值 bs x tuple(image, target), 
+        返回的是一个长度为 2 的 tuple, 把 image 和 target 分别放在了一起
+        '''
         return tuple(zip(*batch))
 
 # import transforms

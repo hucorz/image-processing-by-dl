@@ -56,10 +56,10 @@ class FasterRCNNBase(nn.Module):
                 like `scores`, `labels` and `mask` (for Mask R-CNN models).
 
         """
-        if self.training and targets is None:
+        if self.training and targets is None: # 训练模式必须要有 target
             raise ValueError("In training mode, targets should be passed")
 
-        if self.training:
+        if self.training:  # 这部分是检查一下 target 的格式是否正确
             assert targets is not None
             for target in targets:         # 进一步判断传入的target的boxes参数是否符合规定
                 boxes = target["boxes"]
@@ -72,7 +72,7 @@ class FasterRCNNBase(nn.Module):
                     raise ValueError("Expected target boxes to be of type "
                                      "Tensor, got {:}.".format(type(boxes)))
 
-        original_image_sizes = torch.jit.annotate(List[Tuple[int, int]], [])
+        original_image_sizes = torch.jit.annotate(List[Tuple[int, int]], []) # 记录图像的原始尺寸，类型为 List[Tuple[int, int]]
         for img in images:
             val = img.shape[-2:]
             assert len(val) == 2  # 防止输入的是个一维向量
@@ -101,7 +101,7 @@ class FasterRCNNBase(nn.Module):
         losses.update(detector_losses)
         losses.update(proposal_losses)
 
-        if torch.jit.is_scripting():
+        if torch.jit.is_scripting(): # torchscript 不是很懂
             if not self._has_warned:
                 warnings.warn("RCNN always returns a (Losses, Detections) tuple in scripting")
                 self._has_warned = True
@@ -250,14 +250,14 @@ class FasterRCNN(FasterRCNNBase):
                  image_mean=None, image_std=None,  # 预处理normalize时使用的均值和方差
                  # RPN parameters
                  rpn_anchor_generator=None, rpn_head=None,
-                 rpn_pre_nms_top_n_train=2000, rpn_pre_nms_top_n_test=1000,    # rpn中在nms处理前保留的proposal数(根据score)
-                 rpn_post_nms_top_n_train=2000, rpn_post_nms_top_n_test=1000,  # rpn中在nms处理后保留的proposal数
+                 rpn_pre_nms_top_n_train=2000, rpn_pre_nms_top_n_test=1000,    # rpn中在nms处理前保留的proposal数(根据score),这里是RPN中每层保留的个数，train和test不同
+                 rpn_post_nms_top_n_train=2000, rpn_post_nms_top_n_test=1000,  # rpn中在nms处理后保留的proposal数,这里是最终保留的个数
                  rpn_nms_thresh=0.7,  # rpn中进行nms处理时使用的iou阈值
                  rpn_fg_iou_thresh=0.7, rpn_bg_iou_thresh=0.3,  # rpn计算损失时，采集正负样本设置的阈值
                  rpn_batch_size_per_image=256, rpn_positive_fraction=0.5,  # rpn计算损失时采样的样本数，以及正样本占总样本的比例
                  rpn_score_thresh=0.0,
                  # Box parameters
-                 box_roi_pool=None, box_head=None, box_predictor=None,
+                 box_roi_pool=None, box_head=None, box_predictor=None,  # ROIPooling, MLPHead, predictor 
                  # 移除低目标概率      fast rcnn中进行nms处理的阈值   对预测结果根据score排序取前100个目标
                  box_score_thresh=0.05, box_nms_thresh=0.5, box_detections_per_img=100,
                  box_fg_iou_thresh=0.5, box_bg_iou_thresh=0.5,   # fast rcnn计算误差时，采集正负样本设置的阈值
@@ -270,7 +270,7 @@ class FasterRCNN(FasterRCNNBase):
                 "same for all the levels"
             )
 
-        assert isinstance(rpn_anchor_generator, (AnchorsGenerator, type(None)))
+        assert isinstance(rpn_anchor_generator, (AnchorsGenerator, type(None))) # 为 None 后面会自动创建一个
         assert isinstance(box_roi_pool, (MultiScaleRoIAlign, type(None)))
 
         if num_classes is not None:
@@ -286,8 +286,9 @@ class FasterRCNN(FasterRCNNBase):
         out_channels = backbone.out_channels
 
         # 若anchor生成器为空，则自动生成针对resnet50_fpn的anchor生成器
+        # 使用 mobilenet 作为 backbone 时会传入 rpn_anchor_generatror
         if rpn_anchor_generator is None:
-            anchor_sizes = ((32,), (64,), (128,), (256,), (512,))
+            anchor_sizes = ((32,), (64,), (128,), (256,), (512,)) # resnet 有 5 层特征层会用到, 而 mobilenet 只有 1 层
             aspect_ratios = ((0.5, 1.0, 2.0),) * len(anchor_sizes)
             rpn_anchor_generator = AnchorsGenerator(
                 anchor_sizes, aspect_ratios
@@ -313,9 +314,10 @@ class FasterRCNN(FasterRCNNBase):
             score_thresh=rpn_score_thresh)
 
         #  Multi-scale RoIAlign pooling
+        # 这里也是定义的给 resnet 使用的 roipool，使用 mobilenet 时会传入这个参数
         if box_roi_pool is None:
             box_roi_pool = MultiScaleRoIAlign(
-                featmap_names=['0', '1', '2', '3'],  # 在哪些特征层进行roi pooling
+                featmap_names=['0', '1', '2', '3'],  # 在哪些特征层进行roi pooling, 只用 4 层，对精度没有影响，用 5 层反而增加计算量
                 output_size=[7, 7],
                 sampling_ratio=2)
 
@@ -335,7 +337,7 @@ class FasterRCNN(FasterRCNNBase):
                 representation_size,
                 num_classes)
 
-        # 将roi pooling, box_head以及box_predictor结合在一起
+        # 将roi pooling, box_head以及box_predictor结合在一起, 组成 roi_heads
         roi_heads = RoIHeads(
             # box
             box_roi_pool, box_head, box_predictor,
@@ -344,12 +346,13 @@ class FasterRCNN(FasterRCNNBase):
             bbox_reg_weights,
             box_score_thresh, box_nms_thresh, box_detections_per_img)  # 0.05  0.5  100
 
+        # imagenet 的均值和方差
         if image_mean is None:
             image_mean = [0.485, 0.456, 0.406]
         if image_std is None:
             image_std = [0.229, 0.224, 0.225]
 
-        # 对数据进行标准化，缩放，打包成batch等处理部分
-        transform = GeneralizedRCNNTransform(min_size, max_size, image_mean, image_std)
+        # 对数据进行标准化，缩放，打包成batch等处理部分, 图像在输入 backbone 的部分, 也包含了最后的 postprocess 的部分
+        transform = GeneralizedRCNNTransform(min_size, max_size, image_mean, image_std)  # transform 是 nn.Module 的子类
 
         super(FasterRCNN, self).__init__(backbone, rpn, roi_heads, transform)
