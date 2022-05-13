@@ -59,8 +59,8 @@ class AnchorsGenerator(nn.Module):
 
         assert len(sizes) == len(aspect_ratios)
 
-        self.sizes = sizes
-        self.aspect_ratios = aspect_ratios
+        self.sizes = sizes   # anchor 尺度
+        self.aspect_ratios = aspect_ratios # anchor 长宽比
         self.cell_anchors = None
         self._cache = {}
 
@@ -76,7 +76,7 @@ class AnchorsGenerator(nn.Module):
         """
         scales = torch.as_tensor(scales, dtype=dtype, device=device)
         aspect_ratios = torch.as_tensor(aspect_ratios, dtype=dtype, device=device)
-        h_ratios = torch.sqrt(aspect_ratios)
+        h_ratios = torch.sqrt(aspect_ratios) # 长宽缩放比例
         w_ratios = 1.0 / h_ratios
 
         # [r1, r2, r3]' * [s1, s2, s3]
@@ -90,7 +90,7 @@ class AnchorsGenerator(nn.Module):
 
         return base_anchors.round()  # round 四舍五入
 
-    def set_cell_anchors(self, dtype, device):
+    def set_cell_anchors(self, dtype, device):  
         # type: (torch.dtype, torch.device) -> None
         if self.cell_anchors is not None:
             cell_anchors = self.cell_anchors
@@ -133,6 +133,7 @@ class AnchorsGenerator(nn.Module):
             stride_height, stride_width = stride
             device = base_anchors.device
 
+            # 将特征图 grid_width 的坐标映射到原图上
             # For output anchor, compute [x_center, y_center, x_center, y_center]
             # shape: [grid_width] 对应原图上的x坐标(列)
             shifts_x = torch.arange(0, grid_width, dtype=torch.float32, device=device) * stride_width
@@ -153,7 +154,7 @@ class AnchorsGenerator(nn.Module):
             # For every (base anchor, output anchor) pair,
             # offset each zero-centered base anchor by the center of the output anchor.
             # 将anchors模板与原图上的坐标偏移量相加得到原图上所有anchors的坐标信息(shape不同时会使用广播机制)
-            shifts_anchor = shifts.view(-1, 1, 4) + base_anchors.view(1, -1, 4)
+            shifts_anchor = shifts.view(-1, 1, 4) + base_anchors.view(1, -1, 4) # base anchor 中是左上角和右下角的坐标
             anchors.append(shifts_anchor.reshape(-1, 4))
 
         return anchors  # List[Tensor(all_num_anchors, 4)]
@@ -161,7 +162,7 @@ class AnchorsGenerator(nn.Module):
     def cached_grid_anchors(self, grid_sizes, strides):
         # type: (List[List[int]], List[List[Tensor]]) -> List[Tensor]
         """将计算得到的所有anchors信息进行缓存"""
-        key = str(grid_sizes) + str(strides)
+        key = str(grid_sizes) + str(strides) # 用来当做字典的key
         # self._cache是字典类型
         if key in self._cache:
             return self._cache[key]
@@ -171,6 +172,7 @@ class AnchorsGenerator(nn.Module):
 
     def forward(self, image_list, feature_maps):
         # type: (ImageList, List[Tensor]) -> List[Tensor]
+        # 下面注释中的原图都指 resize 后并且 batch_img 后的尺寸
         # 获取每个预测特征层的尺寸(height, width)
         grid_sizes = list([feature_map.shape[-2:] for feature_map in feature_maps])
 
@@ -181,29 +183,29 @@ class AnchorsGenerator(nn.Module):
         dtype, device = feature_maps[0].dtype, feature_maps[0].device
 
         # one step in feature map equate n pixel stride in origin image
-        # 计算特征层上的一步等于原始图像上的步长
+        # 计算特征层上的一步等于原始图像上的步长, 即比例
         strides = [[torch.tensor(image_size[0] // g[0], dtype=torch.int64, device=device),
                     torch.tensor(image_size[1] // g[1], dtype=torch.int64, device=device)] for g in grid_sizes]
 
-        # 根据提供的sizes和aspect_ratios生成anchors模板
+        # 根据提供的sizes和aspect_ratios生成anchors模板, 这里的尺度都是相对于原题的尺度
         self.set_cell_anchors(dtype, device)
 
         # 计算/读取所有anchors的坐标信息（这里的anchors信息是映射到原图上的所有anchors信息，不是anchors模板）
         # 得到的是一个list列表，对应每张预测特征图映射回原图的anchors坐标信息
         anchors_over_all_feature_maps = self.cached_grid_anchors(grid_sizes, strides)
 
-        anchors = torch.jit.annotate(List[List[torch.Tensor]], [])
+        anchors = torch.jit.annotate(List[List[torch.Tensor]], []) 
         # 遍历一个batch中的每张图像
-        for i, (image_height, image_width) in enumerate(image_list.image_sizes):
+        for i, (image_height, image_width) in enumerate(image_list.image_sizes): # 就是把 anchors_over_all_feature_maps 复制 batch size 份
             anchors_in_image = []
             # 遍历每张预测特征图映射回原图的anchors坐标信息
-            for anchors_per_feature_map in anchors_over_all_feature_maps:
+            for anchors_per_feature_map in anchors_over_all_feature_maps: # 这段似乎是无意义的操作, cached_grid_anchors 返回的本来就是 List[Tensor]
                 anchors_in_image.append(anchors_per_feature_map)
             anchors.append(anchors_in_image)
         # 将每一张图像的所有预测特征层的anchors坐标信息拼接在一起
         # anchors是个list，每个元素为一张图像的所有anchors信息
-        anchors = [torch.cat(anchors_per_image) for anchors_per_image in anchors]
-        # Clear the cache in case that memory leaks.
+        anchors = [torch.cat(anchors_per_image) for anchors_per_image in anchors] # List[List[Tensor]] -> List[Tensor]
+        # Clear the cache in case that memory leaks. 防止内存泄露
         self._cache.clear()
         return anchors
 
@@ -222,12 +224,12 @@ class RPNHead(nn.Module):
         super(RPNHead, self).__init__()
         # 3x3 滑动窗口
         self.conv = nn.Conv2d(in_channels, in_channels, kernel_size=3, stride=1, padding=1)
-        # 计算预测的目标分数（这里的目标只是指前景或者背景）
+        # 计算预测的目标分数（这里的目标只是指前景或者背景）,原论文中每个 anchor 都用了 2 个值来预测，这里只用一个
         self.cls_logits = nn.Conv2d(in_channels, num_anchors, kernel_size=1, stride=1)
-        # 计算预测的目标bbox regression参数
+        # 计算预测的目标bbox regression参数, 每个 anchor 4 个回归参数，中心点和长宽
         self.bbox_pred = nn.Conv2d(in_channels, num_anchors * 4, kernel_size=1, stride=1)
 
-        for layer in self.children():
+        for layer in self.children():  # 对上面的层进行初始化
             if isinstance(layer, nn.Conv2d):
                 torch.nn.init.normal_(layer.weight, std=0.01)
                 torch.nn.init.constant_(layer.bias, 0)
@@ -236,7 +238,7 @@ class RPNHead(nn.Module):
         # type: (List[Tensor]) -> Tuple[List[Tensor], List[Tensor]]
         logits = []
         bbox_reg = []
-        for i, feature in enumerate(x):
+        for i, feature in enumerate(x): # 遍历每一个预测特征层
             t = F.relu(self.conv(feature))
             logits.append(self.cls_logits(t))
             bbox_reg.append(self.bbox_pred(t))

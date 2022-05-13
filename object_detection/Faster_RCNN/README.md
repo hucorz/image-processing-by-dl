@@ -4,7 +4,7 @@
 
 
 
-## 结构图
+## 模型结构图
 
 黄色线是只有在训练时才会有的步骤
 
@@ -18,4 +18,13 @@
 -   Resize，这里的每张图片的尺寸都是不一样的，所以这里把每个 Batch 的图片的长宽都 Resize 到同一个范围内，Resize 的方法采用双线性插值
 -   batch images，把 Resize 后的图片全都打包到同样的维度，方法是选取一个 Batch 中所有图片最大的长和宽，然后在图片的右边和下面补 0，补到最大的长和宽；如下图
 
-<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fasterRCNN_2.png" style="zoom:60%;" />
+<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fasterRCNN_2.png" style="zoom:40%;" />
+
+## 代码结构
+
+### GeneralizedRCNNTransform
+
+network_files 中：
+
+-   image_list.py
+-   transform.py: 其中有一个后面会用到的后处理方法
