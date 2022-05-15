@@ -77,9 +77,9 @@ def batched_nms(boxes, scores, idxs, iou_threshold):
     # 为每一个类别/每一层生成一个很大的偏移量
     # 这里的to只是让生成tensor的dytpe和device与boxes保持一致
     offsets = idxs.to(boxes) * (max_coordinate + 1)
-    # boxes加上对应层的偏移量后，保证不同类别/层之间boxes不会有重合的现象
+    # boxes加上对应层的偏移量后，保证不同类别/层之间boxes不会有重合的现象,这么做的目的是不让不同层的proposal之间做nms并且不影响同一层之间的proposal的nms
     boxes_for_nms = boxes + offsets[:, None]
-    keep = nms(boxes_for_nms, scores, iou_threshold)
+    keep = nms(boxes_for_nms, scores, iou_threshold) # https://pytorch.org/vision/stable/generated/torchvision.ops.nms.html?highlight=nms#torchvision.ops.nms
     return keep
 
 
@@ -101,7 +101,7 @@ def remove_small_boxes(boxes, min_size):
     keep = torch.logical_and(torch.ge(ws, min_size), torch.ge(hs, min_size))
     # nonzero(): Returns a tensor containing the indices of all non-zero elements of input
     # keep = keep.nonzero().squeeze(1)
-    keep = torch.where(keep)[0]
+    keep = torch.where(keep)[0] # torch.where(condition) is identical to torch.nonzero(condition, as_tuple=True)(pytorch官网),这边得到的是一个一维的index
     return keep
 
 

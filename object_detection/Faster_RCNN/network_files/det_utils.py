@@ -172,7 +172,7 @@ class BoxCoder(object):
 
         # targets_dx, targets_dy, targets_dw, targets_dh
         targets = self.encode_single(reference_boxes, proposals)
-        return targets.split(boxes_per_image, 0)
+        return targets.split(boxes_per_image, 0) # 分成bs份
 
     def encode_single(self, reference_boxes, proposals):
         """
@@ -203,10 +203,10 @@ class BoxCoder(object):
         """
         assert isinstance(boxes, (list, tuple))
         assert isinstance(rel_codes, torch.Tensor)
-        boxes_per_image = [b.size(0) for b in boxes]
+        boxes_per_image = [b.size(0) for b in boxes] # 获取每张图片的 anchor 的数量（数量不是一定的）
         concat_boxes = torch.cat(boxes, dim=0)
 
-        box_sum = 0
+        box_sum = 0 # 这部分就是 concat_boxes 的长度
         for val in boxes_per_image:
             box_sum += val
 
@@ -232,28 +232,31 @@ class BoxCoder(object):
         """
         boxes = boxes.to(rel_codes.dtype)
 
-        # xmin, ymin, xmax, ymax
+        # boxes 中的的信息是 xmin, ymin, xmax, ymax
         widths = boxes[:, 2] - boxes[:, 0]   # anchor/proposal宽度
         heights = boxes[:, 3] - boxes[:, 1]  # anchor/proposal高度
         ctr_x = boxes[:, 0] + 0.5 * widths   # anchor/proposal中心x坐标
         ctr_y = boxes[:, 1] + 0.5 * heights  # anchor/proposal中心y坐标
 
         wx, wy, ww, wh = self.weights  # RPN中为[1,1,1,1], fastrcnn中为[10,10,5,5]
-        dx = rel_codes[:, 0::4] / wx   # 预测anchors/proposals的中心坐标x回归参数
+        dx = rel_codes[:, 0::4] / wx   # 预测anchors/proposals的中心坐标x回归参数, 这里都设置步距为 4 是为了保留这个维度, 这里的回归参数包含了所有类别的回归参数，每4个一组
         dy = rel_codes[:, 1::4] / wy   # 预测anchors/proposals的中心坐标y回归参数
         dw = rel_codes[:, 2::4] / ww   # 预测anchors/proposals的宽度回归参数
         dh = rel_codes[:, 3::4] / wh   # 预测anchors/proposals的高度回归参数
 
         # limit max value, prevent sending too large values into torch.exp()
         # self.bbox_xform_clip=math.log(1000. / 16)   4.135
+        # 限制最大值
         dw = torch.clamp(dw, max=self.bbox_xform_clip)
         dh = torch.clamp(dh, max=self.bbox_xform_clip)
 
+        # 应用 bbox 的回归参数
         pred_ctr_x = dx * widths[:, None] + ctr_x[:, None]
         pred_ctr_y = dy * heights[:, None] + ctr_y[:, None]
         pred_w = torch.exp(dw) * widths[:, None]
         pred_h = torch.exp(dh) * heights[:, None]
 
+        # 把应用回归参数得到的坐标变回左上角和右上角的坐标
         # xmin
         pred_boxes1 = pred_ctr_x - torch.tensor(0.5, dtype=pred_ctr_x.dtype, device=pred_w.device) * pred_w
         # ymin
@@ -263,7 +266,7 @@ class BoxCoder(object):
         # ymax
         pred_boxes4 = pred_ctr_y + torch.tensor(0.5, dtype=pred_ctr_y.dtype, device=pred_h.device) * pred_h
 
-        pred_boxes = torch.stack((pred_boxes1, pred_boxes2, pred_boxes3, pred_boxes4), dim=2).flatten(1)
+        pred_boxes = torch.stack((pred_boxes1, pred_boxes2, pred_boxes3, pred_boxes4), dim=2).flatten(1)  # xmin等 的维度都是 [n, 1]，在 dim=2 stack 再 flatten等效于直接在 dim=1 cat
         return pred_boxes
 
 
@@ -326,9 +329,9 @@ class Matcher(object):
         # Max over gt elements (dim 0) to find best gt candidate for each prediction
         # M x N 的每一列代表一个anchors与所有gt的匹配iou值
         # matched_vals代表每列的最大值，即每个anchors与所有gt匹配的最大iou值
-        # matches对应最大值所在的索引
+        # matches对应最大值所在的索引(gt_box的所索引)
         matched_vals, matches = match_quality_matrix.max(dim=0)  # the dimension to reduce.
-        if self.allow_low_quality_matches:
+        if self.allow_low_quality_matches: # 表示是否要让每个 gt_box 的最大 iou 的 anchor 作为正样本
             all_matches = matches.clone()
         else:
             all_matches = None
@@ -346,7 +349,7 @@ class Matcher(object):
         # iou在[low_threshold, high_threshold]之间的matches索引置为-2
         matches[between_thresholds] = self.BETWEEN_THRESHOLDS    # -2
 
-        if self.allow_low_quality_matches:
+        if self.allow_low_quality_matches:# 表示是否要让每个 gt_box 的最大 iou 的 anchor 作为正样本,如果不这么做可能有的gtbox没有匹配正样本
             assert all_matches is not None
             self.set_low_quality_matches_(matches, all_matches, match_quality_matrix)
 
@@ -388,8 +391,8 @@ class Matcher(object):
         # Note how gt items 1, 2, 3, and 5 each have two ties
 
         # gt_pred_pairs_of_highest_quality[:, 0]代表是对应的gt index(不需要)
-        # pre_inds_to_update = gt_pred_pairs_of_highest_quality[:, 1]
-        pre_inds_to_update = gt_pred_pairs_of_highest_quality[1]
+        # pre_inds_to_update = gt_pred_pairs_of_highest_quality[:, 1] # 如果用的是 torch.nonzero 就用这句
+        pre_inds_to_update = gt_pred_pairs_of_highest_quality[1] # 这里是没有问题的，因为用的是 torch.where 而不是 torch.nonzero，where返回的是一个 tuple，[0]表示横坐标，[1]表示列坐标
         # 保留该anchor匹配gt最大iou的索引，即使iou低于设定的阈值
         matches[pre_inds_to_update] = all_matches[pre_inds_to_update]
 

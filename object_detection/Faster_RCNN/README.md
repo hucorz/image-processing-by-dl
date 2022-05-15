@@ -28,3 +28,19 @@ network_files 中：
 
 -   image_list.py
 -   transform.py: 其中有一个后面会用到的后处理方法
+
+### RPN
+
+network_files 中:
+
+- ron_function.py
+- boxes
+
+会用到 boxes 和 det_utils 里的一些类和方法
+
+### ROI
+
+network_files 中:
+
+-   faster_rcnn_framework.py 中定义的 ROIAling, TwoMLPHead, FasterRCNNPredicter, 这三个作为参数传给 ROIHeads 类 
+-   ROI_head.py 

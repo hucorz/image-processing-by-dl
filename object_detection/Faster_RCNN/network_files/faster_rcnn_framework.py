@@ -95,7 +95,7 @@ class FasterRCNNBase(nn.Module):
         detections, detector_losses = self.roi_heads(features, proposals, images.image_sizes, targets)
 
         # 对网络的预测结果进行后处理（主要将bboxes还原到原图像尺度上）
-        detections = self.transform.postprocess(detections, images.image_sizes, original_image_sizes)
+        detections = self.transform.postprocess(detections, images.image_sizes, original_image_sizes) # original这是真正的原始尺寸
 
         losses = {}
         losses.update(detector_losses)
@@ -107,7 +107,7 @@ class FasterRCNNBase(nn.Module):
                 self._has_warned = True
             return losses, detections
         else:
-            return self.eager_outputs(losses, detections)
+            return self.eager_outputs(losses, detections) # 如果training模式就返回loss，否则就返回detection
 
         # if self.training:
         #     return losses
@@ -151,7 +151,7 @@ class FastRCNNPredictor(nn.Module):
 
     def __init__(self, in_channels, num_classes):
         super(FastRCNNPredictor, self).__init__()
-        self.cls_score = nn.Linear(in_channels, num_classes)
+        self.cls_score = nn.Linear(in_channels, num_classes) # 这里的类别有背景的类别
         self.bbox_pred = nn.Linear(in_channels, num_classes * 4)
 
     def forward(self, x):
@@ -253,7 +253,7 @@ class FasterRCNN(FasterRCNNBase):
                  rpn_pre_nms_top_n_train=2000, rpn_pre_nms_top_n_test=1000,    # rpn中在nms处理前保留的proposal数(根据score),这里是RPN中每层保留的个数，train和test不同
                  rpn_post_nms_top_n_train=2000, rpn_post_nms_top_n_test=1000,  # rpn中在nms处理后保留的proposal数,这里是最终保留的个数
                  rpn_nms_thresh=0.7,  # rpn中进行nms处理时使用的iou阈值
-                 rpn_fg_iou_thresh=0.7, rpn_bg_iou_thresh=0.3,  # rpn计算损失时，采集正负样本设置的阈值
+                 rpn_fg_iou_thresh=0.7, rpn_bg_iou_thresh=0.3,  # rpn计算损失时，采集正负样本设置的阈值, fg:前景, bg:背景, 如果在两者之间就舍去
                  rpn_batch_size_per_image=256, rpn_positive_fraction=0.5,  # rpn计算损失时采样的样本数，以及正样本占总样本的比例
                  rpn_score_thresh=0.0,
                  # Box parameters
@@ -302,6 +302,7 @@ class FasterRCNN(FasterRCNNBase):
 
         # 默认rpn_pre_nms_top_n_train = 2000, rpn_pre_nms_top_n_test = 1000,
         # 默认rpn_post_nms_top_n_train = 2000, rpn_post_nms_top_n_test = 1000,
+        # pre_nms_top_n 会对每个特征层上的proposal选取是前景概率高的
         rpn_pre_nms_top_n = dict(training=rpn_pre_nms_top_n_train, testing=rpn_pre_nms_top_n_test)
         rpn_post_nms_top_n = dict(training=rpn_post_nms_top_n_train, testing=rpn_post_nms_top_n_test)
 
@@ -316,9 +317,9 @@ class FasterRCNN(FasterRCNNBase):
         #  Multi-scale RoIAlign pooling
         # 这里也是定义的给 resnet 使用的 roipool，使用 mobilenet 时会传入这个参数
         if box_roi_pool is None:
-            box_roi_pool = MultiScaleRoIAlign(
+            box_roi_pool = MultiScaleRoIAlign( # torchvision 如何实现的底层看不到
                 featmap_names=['0', '1', '2', '3'],  # 在哪些特征层进行roi pooling, 只用 4 层，对精度没有影响，用 5 层反而增加计算量
-                output_size=[7, 7],
+                output_size=[7, 7],   # 经过ROIAlign后的尺寸是固定的, 且不改变channel
                 sampling_ratio=2)
 
         # fast RCNN中roi pooling后的展平处理两个全连接层部分
