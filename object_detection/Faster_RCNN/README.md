@@ -2,7 +2,23 @@
 
 代码来源：[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_object_detection/faster_rcnn)
 
+mobilenetv3 large 作为 backbone 在 pascal voc 上训练 10 个 epoch（效果挺差的，用了 colab 跑了好几个小时）
 
+```
+IoU metric: bbox
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.179
+ Average Precision  (AP) @[ IoU=0.50      | area=   all | maxDets=100 ] = 0.431
+ Average Precision  (AP) @[ IoU=0.75      | area=   all | maxDets=100 ] = 0.106
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.077
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.141
+ Average Precision  (AP) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.197
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=  1 ] = 0.235
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets= 10 ] = 0.409
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=   all | maxDets=100 ] = 0.430
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.201
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.338
+ Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.465
+ ```
 
 ## 模型结构图
 
@@ -22,11 +38,17 @@
 
 ## 代码结构
 
+my_dataset.py: 定义的 PASCAL VOC 的数据集
+
+transforms.py: 对 transformer 的重写，因为涉及到的翻转操作会改变 target 的坐标
+
 ### backbone
 
-
+feature_pyramid_network.py: 提供了对 backbone 进行封装，抽取指定层的输出并传入 FPN 得到最终的特征图
 
 ### network_file
+
+faster rcnn 对图像的预处理，RPN 部分，ROI 部分
 
 #### GeneralizedRCNNTransfom 部分
 
@@ -36,7 +58,7 @@
 #### RPN 部分
 
 - ron_function.py
-- boxes
+- boxes.py
 
 会用到 boxes 和 det_utils 里的一些类和方法
 

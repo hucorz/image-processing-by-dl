@@ -156,11 +156,11 @@ class FeaturePyramidNetwork(nn.Module):
         results.append(self.get_result_from_layer_blocks(last_inner, -1))
 
         for idx in range(len(x) - 2, -1, -1):
-            inner_lateral = self.get_result_from_inner_blocks(x[idx], idx)
+            inner_lateral = self.get_result_from_inner_blocks(x[idx], idx) # 1x1 调整 channel
             feat_shape = inner_lateral.shape[-2:]
             inner_top_down = F.interpolate(last_inner, size=feat_shape, mode="nearest")
             last_inner = inner_lateral + inner_top_down
-            results.insert(0, self.get_result_from_layer_blocks(last_inner, idx))
+            results.insert(0, self.get_result_from_layer_blocks(last_inner, idx))  # 3x3 融合信息 
 
         # 在layer4对应的预测特征层基础上生成预测特征矩阵5
         if self.extra_blocks is not None:
