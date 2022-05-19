@@ -5,6 +5,7 @@ import torch
 import json
 from PIL import Image
 from lxml import etree
+import pdb
 
 
 class VOCDataSet(Dataset):
@@ -206,6 +207,7 @@ class VOCDataSet(Dataset):
         传入 args 的是 Dataset 的 getitem 的返回值 bs x tuple(image, target), 
         返回的是一个长度为 2 的 tuple, 把 image 和 target 分别放在了一起
         '''
+        # pdb.set_trace()
         return tuple(zip(*batch))
 
 # import transforms

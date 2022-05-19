@@ -18,7 +18,7 @@ IoU metric: bbox
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= small | maxDets=100 ] = 0.201
  Average Recall     (AR) @[ IoU=0.50:0.95 | area=medium | maxDets=100 ] = 0.338
  Average Recall     (AR) @[ IoU=0.50:0.95 | area= large | maxDets=100 ] = 0.465
- ```
+```
 
 ## 模型结构图
 
@@ -35,6 +35,29 @@ IoU metric: bbox
 -   batch images，把 Resize 后的图片全都打包到同样的维度，方法是选取一个 Batch 中所有图片最大的长和宽，然后在图片的右边和下面补 0，补到最大的长和宽；如下图
 
 <img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fasterRCNN_2.png" style="zoom:40%;" />
+
+### Backbone
+
+特征提取部分, 可以使用不同的 classification 网络，选取不同层的输出作为 feature map
+
+也可以选择是否使用 FPN 对输出的不同层次的 feature map 进行融合，得到新的 feature map
+
+<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fpn_1.png" style="zoom:60%;" />
+
+### RPN
+
+-   AnchorGenerator:：锚框生成器，形成不同尺度，不同长宽比的 proposal anchor
+-   RPN Head：对 backbone 得到的特征图上的每一个像素都进行对 anchor 类别的预测和 anchor 回归参数的预测；这里的 feature map 的每一个像素是等比例映射到原图上作为 anchor 的中心点
+-   随机取样 proposal anchor 计算 Loss，类别 Loss 正样本和负样本都计算，回归参数 Loss 只计算正样本的
+
+<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fasterRCNN_3.png" style="zoom:60%;" />
+
+### ROI
+
+-   ROIPooling：现在一般使用 ROIAlign，ROIPooling 进行的 2 次取整，对精度损失较大；在得到的 proposal anchor 上映射到 feature map 上，然后转化为同样的维度的特征图，方便后面的处理
+-   Two MLPHead：2 个 fc 层
+-   Faster RCNNPredictor：计算选中区域的 logits 和 回归参数
+-   PostPrecessing：后处理
 
 ## 代码结构
 
