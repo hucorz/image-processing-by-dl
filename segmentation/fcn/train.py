@@ -48,11 +48,11 @@ def get_transform(train):
     return SegmentationPresetTrain(base_size, crop_size) if train else SegmentationPresetEval(base_size)
 
 
-def create_model(aux, num_classes, pretrain=True):
+def create_model(aux, num_classes, pretrain=None):
     model = fcn_resnet50(aux=aux, num_classes=num_classes)
 
     if pretrain:
-        weights_dict = torch.load("./fcn_resnet50_coco.pth", map_location='cpu')
+        weights_dict = torch.load(pretrain, map_location='cpu')
 
         if num_classes != 21:
             # 官方提供的预训练权重是21类(包括背景)
@@ -104,9 +104,21 @@ def main(args):
                                              pin_memory=True,
                                              collate_fn=val_dataset.collate_fn)
 
-    model = create_model(aux=args.aux, num_classes=num_classes)
+    if args.pretrain:
+        model = create_model(aux=args.aux, num_classes=num_classes, pretrain=args.pretrain)
+    elif args.resume:
+        model = create_model(aux=args.aux, num_classes=num_classes)
+        checkpoint = torch.load(args.resume, map_location='cpu')
+        model.load_state_dict(checkpoint['model'])
+        optimizer.load_state_dict(checkpoint['optimizer'])
+        lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
+        args.start_epoch = checkpoint['epoch'] + 1
+        if args.amp:
+            scaler.load_state_dict(checkpoint["scaler"])
+    else:
+        model = create_model(aux=args.aux, num_classes=num_classes)
     model.to(device)
-
+    
     params_to_optimize = [
         {"params": [p for p in model.backbone.parameters() if p.requires_grad]},
         {"params": [p for p in model.classifier.parameters() if p.requires_grad]}
@@ -126,15 +138,7 @@ def main(args):
     # 创建学习率更新策略，这里是每个step更新一次(不是每个epoch)
     lr_scheduler = create_lr_scheduler(optimizer, len(train_loader), args.epochs, warmup=True)
 
-    if args.resume:
-        checkpoint = torch.load(args.resume, map_location='cpu')
-        model.load_state_dict(checkpoint['model'])
-        optimizer.load_state_dict(checkpoint['optimizer'])
-        lr_scheduler.load_state_dict(checkpoint['lr_scheduler'])
-        args.start_epoch = checkpoint['epoch'] + 1
-        if args.amp:
-            scaler.load_state_dict(checkpoint["scaler"])
-
+    
     start_time = time.time()
     for epoch in range(args.start_epoch, args.epochs):
         mean_loss, lr = train_one_epoch(model, optimizer, train_loader, device, epoch,
@@ -184,7 +188,8 @@ def parse_args():
                         metavar='W', help='weight decay (default: 1e-4)',
                         dest='weight_decay')
     parser.add_argument('--print-freq', default=10, type=int, help='print frequency')
-    parser.add_argument('--resume', default='', help='resume from checkpoint')
+    parser.add_argument('--pretrain', default=None, type=str, help='pretrained pth file path')
+    parser.add_argument('--resume', default=None, type=str, help='resume from checkpoint')
     parser.add_argument('--start-epoch', default=0, type=int, metavar='N',
                         help='start epoch')
     # Mixed precision training parameters
