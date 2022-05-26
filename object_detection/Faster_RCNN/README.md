@@ -24,7 +24,7 @@ IoU metric: bbox
 
 黄色线是只有在训练时才会有的步骤
 
-<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fasterRCNN_1.png"  />
+![](../../img/obj_detection/fasterRCNN_1.png)
 
 ## Model
 
@@ -34,7 +34,8 @@ IoU metric: bbox
 -   Resize，这里的每张图片的尺寸都是不一样的，所以这里把每个 Batch 的图片的长宽都 Resize 到同一个范围内，Resize 的方法采用双线性插值
 -   batch images，把 Resize 后的图片全都打包到同样的维度，方法是选取一个 Batch 中所有图片最大的长和宽，然后在图片的右边和下面补 0，补到最大的长和宽；如下图
 
-<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fasterRCNN_2.png" style="zoom:40%;" />
+![](../../img/obj_detection/fasterRCNN_2.png)
+
 
 ### Backbone
 
@@ -42,7 +43,7 @@ IoU metric: bbox
 
 也可以选择是否使用 FPN 对输出的不同层次的 feature map 进行融合，得到新的 feature map
 
-<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fpn_1.png" style="zoom:60%;" />
+![](../../img/obj_detection/fpn_1.png)
 
 ### RPN
 
@@ -50,7 +51,7 @@ IoU metric: bbox
 -   RPN Head：对 backbone 得到的特征图上的每一个像素都进行对 anchor 类别的预测和 anchor 回归参数的预测；这里的 feature map 的每一个像素是等比例映射到原图上作为 anchor 的中心点
 -   随机取样 proposal anchor 计算 Loss，类别 Loss 正样本和负样本都计算，回归参数 Loss 只计算正样本的
 
-<img src="https://cdn.jsdelivr.net/gh/hucorz/image-processing-by-dl/img/obj_detection/fasterRCNN_3.png" style="zoom:60%;" />
+![](../../img/obj_detection/fasterRCNN_3.png)
 
 ### ROI
 

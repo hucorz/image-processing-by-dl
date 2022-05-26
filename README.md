@@ -72,7 +72,5 @@ https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/dat
     - mmclassification/data/split_data.py (来自 [WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/data_set))：把数据集变成 ImageNet 格式
     - mmclassification/data/data_process.py：处理 OpenMMLab 需要的三个文件 classes.txt / train_annotations.txt / val_annotations.txt
 
-## 其他
 
-部分图片不开梯子会无法显示，貌似是因为 md 中用了 相对路径
 
