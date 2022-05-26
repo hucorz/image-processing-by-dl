@@ -1,5 +1,7 @@
 # FCN(Fully Convolutional Networks for Semantic Segmentation)
 
+代码来源：[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_segmentation/fcn)
+
 训练结果：因为是用的官方预训练权重且数据集相同，所以精度没什么变化
 
 ```
