@@ -1,4 +1,4 @@
-# FCN(Fully Convolutional Networks for Semantic Segmentation)
+## Result
 
 代码来源：[WZMIAOMIAO](https://github.com/WZMIAOMIAO/deep-learning-for-image-processing/tree/master/pytorch_segmentation/fcn)
 
@@ -14,18 +14,36 @@ IoU: ['93.1', '84.6', '37.1', '79.0', '69.1', '51.1', '87.0', '72.5', '81.0', '4
 mean IoU: 70.1
 ```
 
+## FCN
+
+Fully Convolutional Networks for Semantic Segmentation: https://arxiv.org/abs/1411.4038
+
+![](../../img/segmentation/FCN_1.png)
+
+不同版本的 FCN:
+
+- 效果图：
+
+![](../../img/segmentation/FCN_2.png)
+
+- 结构：
+
+![](../../img/segmentation/FCN_32s.png)
+
+![](../../img/segmentation/FCN_16s.png)
+
+<img src="../../img/segmentation/FCN_8s.png"  />
+
 ## 代码结构
 
 - src：
-    - backbone：resnet50 / resnet101 backbone
-    - fcn_model: 对 backbone 重构以得到中间层的输出，然后添加 预测头 和 辅助预测头
+  - backbone：resnet50 / resnet101 backbone
+  - fcn_model: 对 backbone 重构以得到中间层的输出，然后添加 预测头 和 辅助预测头
 - train_utils: 
-    - train_and_eval: 定义了 train 和 eval 时会用到的一些函数
+  - train_and_eval: 定义了 train 和 eval 时会用到的一些函数
 - my_dataset: 自定义数据集
 - transformers.py: 自定义 transformer
 - train.py: 训练文件
-
-## 完整的结构图
 
 图中的 layer3 和 layer4 对应 resnet 中的 conv4 和 conv5
 
@@ -34,4 +52,3 @@ mean IoU: 70.1
 bottleneck1 的残差分支不进行下采样，下采样过大对语义分割的影响很大
 
 ![](../../img/segmentation/fcn.png)
-

@@ -1,0 +1,19 @@
+2022-07-31 14:49:34,788 INFO    MainThread:15784 [internal.py:wandb_internal():90] W&B internal server running at pid: 15784, started at: 2022-07-31 14:49:34.787359
+2022-07-31 14:49:34,790 DEBUG   HandlerThread:15784 [handler.py:handle_request():140] handle_request: run_start
+2022-07-31 14:49:34,791 INFO    WriterThread:15784 [datastore.py:open_for_write():75] open: c:\Users\znk\Desktop\Programme\image-processing-by-dl\segmentation\U-Net\wandb\offline-run-20220731_144929-2l2a5gpr\run-2l2a5gpr.wandb
+2022-07-31 14:49:35,462 DEBUG   HandlerThread:15784 [meta.py:__init__():35] meta init
+2022-07-31 14:49:35,462 DEBUG   HandlerThread:15784 [meta.py:__init__():49] meta init done
+2022-07-31 14:49:35,462 DEBUG   HandlerThread:15784 [meta.py:probe():209] probe
+2022-07-31 14:49:35,502 DEBUG   HandlerThread:15784 [meta.py:_setup_git():199] setup git
+2022-07-31 14:49:35,589 DEBUG   HandlerThread:15784 [meta.py:_setup_git():206] setup git done
+2022-07-31 14:49:35,589 DEBUG   HandlerThread:15784 [meta.py:_save_pip():53] save pip
+2022-07-31 14:49:35,590 DEBUG   HandlerThread:15784 [meta.py:_save_pip():67] save pip done
+2022-07-31 14:49:35,590 DEBUG   HandlerThread:15784 [meta.py:_save_conda():74] save conda
+2022-07-31 14:49:38,776 DEBUG   HandlerThread:15784 [meta.py:_save_conda():84] save conda done
+2022-07-31 14:49:38,776 DEBUG   HandlerThread:15784 [meta.py:probe():247] probe done
+2022-07-31 17:12:26,841 WARNING MainThread:15784 [internal.py:is_dead():387] Internal process exiting, parent pid 10028 disappeared
+2022-07-31 17:12:26,845 ERROR   MainThread:15784 [internal.py:wandb_internal():149] Internal process shutdown.
+2022-07-31 17:12:27,147 INFO    WriterThread:15784 [datastore.py:close():279] close: c:\Users\znk\Desktop\Programme\image-processing-by-dl\segmentation\U-Net\wandb\offline-run-20220731_144929-2l2a5gpr\run-2l2a5gpr.wandb
+2022-07-31 17:12:27,148 INFO    HandlerThread:15784 [handler.py:finish():806] shutting down handler
+2022-07-31 17:12:27,791 INFO    SenderThread:15784 [sender.py:finish():1114] shutting down sender
+2022-07-31 17:12:27,797 INFO    MainThread:15784 [internal.py:handle_exit():80] Internal process exited

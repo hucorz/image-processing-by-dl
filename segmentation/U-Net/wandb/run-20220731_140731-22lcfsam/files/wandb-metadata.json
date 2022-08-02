@@ -1,0 +1,23 @@
+{
+    "os": "Windows-10-10.0.19044-SP0",
+    "python": "3.8.13",
+    "heartbeatAt": "2022-07-31T06:07:41.387180",
+    "startedAt": "2022-07-31T06:07:31.971591",
+    "docker": null,
+    "gpu": "NVIDIA GeForce GTX 1650",
+    "gpu_count": 1,
+    "cpu_count": 8,
+    "cuda": null,
+    "args": null,
+    "state": "running",
+    "program": "<python with no main file>",
+    "git": {
+        "remote": "https://github.com/hucorz/image-processing-by-dl.git",
+        "commit": "0f08eae0bd63dbba4876f96dd3219501d437d48f"
+    },
+    "email": "3044464174@qq.com",
+    "root": "C:/Users/znk/Desktop/Programme/image-processing-by-dl",
+    "host": "DESKTOP-HFBRO63",
+    "username": "znk",
+    "executable": "c:\\Users\\znk\\anaconda3\\envs\\kaggle\\python.exe"
+}

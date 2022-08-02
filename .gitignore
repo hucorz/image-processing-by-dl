@@ -1,6 +1,10 @@
 *.pth
 *.npy
+*.jpg
+*.tiff
+*.zip
+
 __pycache__
-data/flower_data
+data
 mmclassification
-object_detection/data
+segmentation\U-Net\Pytorch-UNet
